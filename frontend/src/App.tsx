@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Sparkles, RefreshCw, Landmark } from 'lucide-react';
+import { Sparkles, RefreshCw, Landmark, MessageSquare, X } from 'lucide-react';
 import { apiService } from './services/api';
 import type { Transaction, TransactionFilters } from './services/api';
 import { Dashboard } from './components/Dashboard';
@@ -35,6 +35,7 @@ function App() {
   const [linkedBanks, setLinkedBanks] = useState<string[]>([]);
   const [isLoadingBanks, setIsLoadingBanks] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [isChatMobileOpen, setIsChatMobileOpen] = useState(false);
 
   const handleAuthSuccess = (user: { id: number; username: string }) => {
     localStorage.setItem('currentUser', JSON.stringify(user));
@@ -204,7 +205,7 @@ function App() {
       <main className="dashboard-grid">
         {/* Left Side: Stats and Table */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <Dashboard transactions={transactions} />
+          <Dashboard transactions={transactions} linkedBanks={linkedBanks} />
           
           <TransactionList 
             transactions={transactions} 
@@ -212,14 +213,24 @@ function App() {
             filters={filters}
             setFilters={setFilters}
             onOpenPlaid={() => setIsPlaidOpen(true)}
+            linkedBanks={linkedBanks}
           />
         </div>
 
         {/* Right Side: AI Assistant Chat */}
-        <div>
-          <ChatAssistant />
+        <div className={`chat-sidebar-column ${isChatMobileOpen ? 'mobile-open' : ''}`}>
+          <ChatAssistant onClose={() => setIsChatMobileOpen(false)} />
         </div>
       </main>
+
+      {/* Floating Mobile Chat Action Button */}
+      <button 
+        className="floating-chat-btn" 
+        onClick={() => setIsChatMobileOpen(!isChatMobileOpen)}
+        title="Chat with AI"
+      >
+        {isChatMobileOpen ? <X size={24} /> : <MessageSquare size={24} />}
+      </button>
 
       {/* Plaid Link Modal */}
       <PlaidSandbox 

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles } from 'lucide-react';
+import { Send, Sparkles, X } from 'lucide-react';
 import { apiService } from '../services/api';
 
 interface Message {
@@ -8,7 +8,11 @@ interface Message {
   time: string;
 }
 
-export const ChatAssistant: React.FC = () => {
+interface ChatAssistantProps {
+  onClose?: () => void;
+}
+
+export const ChatAssistant: React.FC<ChatAssistantProps> = ({ onClose }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'assistant',
@@ -173,14 +177,21 @@ export const ChatAssistant: React.FC = () => {
 
   return (
     <div className="chat-widget">
-      <div className="chat-header">
-        <div className="chat-header-status"></div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
-          <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            FinVertex <Sparkles size={13} style={{ color: 'var(--color-accent)' }} />
-          </span>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Spring AI Function Calling Agent</span>
+      <div className="chat-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <div className="chat-header-status"></div>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+              FinVertex <Sparkles size={13} style={{ color: 'var(--color-accent)' }} />
+            </span>
+            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Spring AI Function Calling Agent</span>
+          </div>
         </div>
+        {onClose && (
+          <button onClick={onClose} className="chat-close-btn" aria-label="Close Chat">
+            <X size={18} />
+          </button>
+        )}
       </div>
 
       <div className="chat-messages">

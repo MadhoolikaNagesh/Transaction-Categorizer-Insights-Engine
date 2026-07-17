@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Plus, Calendar, AlertTriangle, Trash2, Layers } from 'lucide-react';
 import { apiService } from '../services/api';
 import type { Transaction, TransactionFilters } from '../services/api';
@@ -9,6 +9,7 @@ interface TransactionListProps {
   filters: TransactionFilters;
   setFilters: React.Dispatch<React.SetStateAction<TransactionFilters>>;
   onOpenPlaid: () => void;
+  linkedBanks: string[];
 }
 
 export const TransactionList: React.FC<TransactionListProps> = ({
@@ -16,21 +17,38 @@ export const TransactionList: React.FC<TransactionListProps> = ({
   onRefresh,
   filters,
   setFilters,
-  onOpenPlaid
+  onOpenPlaid,
+  linkedBanks
 }) => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newDesc, setNewDesc] = useState('');
   const [newAmount, setNewAmount] = useState('');
   const [newDate, setNewDate] = useState(new Date().toISOString().split('T')[0]);
   const [newCategory, setNewCategory] = useState('Uncategorized');
-  const [newBank] = useState('Manual Entry');
+  const [selectedBank, setSelectedBank] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (linkedBanks.length > 0 && !selectedBank) {
+      setSelectedBank(linkedBanks[0]);
+    }
+  }, [linkedBanks, selectedBank]);
 
   const categories = ['All', 'Dining', 'Grocery', 'Transportation', 'Rent', 'Bills', 'Shopping', 'Entertainment', 'Income', 'Medical', 'Uncategorized'];
 
   const handleAddSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDesc || !newAmount) return;
+
+    let bankName = 'Manual Entry';
+    if (linkedBanks.length === 1) {
+      bankName = linkedBanks[0];
+    } else if (linkedBanks.length > 1) {
+      bankName = selectedBank || linkedBanks[0];
+    } else {
+      alert('Please link a bank feed first before adding manual transactions.');
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -40,7 +58,7 @@ export const TransactionList: React.FC<TransactionListProps> = ({
         date: newDate,
         description: newDesc,
         category: newCategory,
-        bankName: newBank,
+        bankName: bankName,
         accountName: 'Wallet',
         anomalyStatus: 'NONE'
       });
@@ -113,65 +131,102 @@ export const TransactionList: React.FC<TransactionListProps> = ({
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem', color: 'var(--color-primary)' }}>
             Add Transaction (AI will auto-categorize if left Uncategorized)
           </h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Description</label>
-              <input
-                type="text"
-                placeholder="e.g. Starbucks MG Road"
-                value={newDesc}
-                onChange={(e) => setNewDesc(e.target.value)}
-                className="filter-input"
-                style={{ width: '100%', padding: '0.4rem 0.6rem' }}
-                required
-              />
+          {linkedBanks.length === 0 ? (
+            <div 
+              style={{ 
+                background: 'rgba(239, 68, 68, 0.1)', 
+                border: '1px solid rgba(239, 68, 68, 0.2)', 
+                padding: '0.75rem 1rem', 
+                borderRadius: '8px', 
+                color: '#f87171', 
+                fontSize: '0.85rem',
+                marginBottom: '1rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
+              }}
+            >
+              <AlertTriangle size={16} />
+              <span>Please link a bank feed first before adding manual transactions.</span>
             </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Description</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Starbucks MG Road"
+                  value={newDesc}
+                  onChange={(e) => setNewDesc(e.target.value)}
+                  className="filter-input"
+                  style={{ width: '100%', padding: '0.4rem 0.6rem' }}
+                  required
+                />
+              </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Amount (₹)</label>
-              <input
-                type="number"
-                placeholder="e.g. 380"
-                value={newAmount}
-                onChange={(e) => setNewAmount(e.target.value)}
-                className="filter-input"
-                style={{ width: '100%', padding: '0.4rem 0.6rem' }}
-                required
-              />
-            </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Amount (₹)</label>
+                <input
+                  type="number"
+                  placeholder="e.g. 380"
+                  value={newAmount}
+                  onChange={(e) => setNewAmount(e.target.value)}
+                  className="filter-input"
+                  style={{ width: '100%', padding: '0.4rem 0.6rem' }}
+                  required
+                />
+              </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Date</label>
-              <input
-                type="date"
-                value={newDate}
-                onChange={(e) => setNewDate(e.target.value)}
-                className="filter-input"
-                style={{ width: '100%', padding: '0.4rem 0.6rem' }}
-                required
-              />
-            </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Date</label>
+                <input
+                  type="date"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                  className="filter-input"
+                  style={{ width: '100%', padding: '0.4rem 0.6rem' }}
+                  required
+                />
+              </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Initial Category</label>
-              <select
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-                className="filter-input"
-                style={{ width: '100%', padding: '0.4rem 0.6rem', background: '#0f172a' }}
-              >
-                {categories.slice(1).map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Initial Category</label>
+                <select
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  className="filter-input"
+                  style={{ width: '100%', padding: '0.4rem 0.6rem', background: '#0f172a' }}
+                >
+                  {categories.slice(1).map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              {linkedBanks.length > 1 && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>Link to Bank</label>
+                  <select
+                    value={selectedBank}
+                    onChange={(e) => setSelectedBank(e.target.value)}
+                    className="filter-input"
+                    style={{ width: '100%', padding: '0.4rem 0.6rem', background: '#0f172a' }}
+                    required
+                  >
+                    {linkedBanks.map(b => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
-          </div>
+          )}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
             <button type="button" onClick={() => setShowAddForm(false)} className="btn btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>
               Cancel
             </button>
-            <button type="submit" className="btn btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={isSubmitting}>
+            <button type="submit" className="btn btn-primary" style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }} disabled={isSubmitting || linkedBanks.length === 0}>
               {isSubmitting ? 'Saving...' : 'Save Transaction'}
             </button>
           </div>

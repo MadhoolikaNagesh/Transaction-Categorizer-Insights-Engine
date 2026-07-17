@@ -4,9 +4,10 @@ import type { Transaction } from '../services/api';
 
 interface DashboardProps {
   transactions: Transaction[];
+  linkedBanks: string[];
 }
 
-export const Dashboard: React.FC<DashboardProps> = ({ transactions }) => {
+export const Dashboard: React.FC<DashboardProps> = ({ transactions, linkedBanks }) => {
   // Calculate aggregate metrics
   const expenses = transactions.filter(t => t.category !== 'Income');
   const totalExpense = expenses.reduce((sum, t) => sum + (t.amount || 0), 0);
@@ -15,8 +16,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ transactions }) => {
   const totalIncome = incomeTrans.reduce((sum, t) => sum + (t.amount || 0), 0);
   
   const anomalies = transactions.filter(t => t.anomalyStatus && t.anomalyStatus !== 'NONE');
-  
-  const uniqueBanks = Array.from(new Set(transactions.map(t => t.bankName).filter(Boolean)));
 
   // Calculate category aggregates
   const categoryMap: Record<string, number> = {};
@@ -26,6 +25,63 @@ export const Dashboard: React.FC<DashboardProps> = ({ transactions }) => {
 
   const sortedCategories = Object.entries(categoryMap)
     .sort((a, b) => b[1] - a[1]);
+
+  // Calculate dynamic spikes
+  const spikes: Array<{ category: string; amount: number; description: string; ratio: number }> = [];
+  if (transactions.length > 0) {
+    const categoryTransactions: Record<string, Transaction[]> = {};
+    expenses.forEach(t => {
+      const cat = t.category || 'Uncategorized';
+      if (!categoryTransactions[cat]) {
+        categoryTransactions[cat] = [];
+      }
+      categoryTransactions[cat].push(t);
+    });
+
+    Object.entries(categoryTransactions).forEach(([category, list]) => {
+      if (list.length < 3) return; // need a baseline to compute average
+      const amounts = list.map(t => t.amount || 0);
+      const maxAmount = Math.max(...amounts);
+      const maxTx = list.find(t => t.amount === maxAmount)!;
+      
+      const otherAmounts = amounts.filter(a => a !== maxAmount);
+      if (otherAmounts.length === 0) return;
+      const avg = otherAmounts.reduce((sum, a) => sum + a, 0) / otherAmounts.length;
+      
+      if (avg > 0 && maxAmount > avg * 1.8 && maxAmount > 1000) {
+        spikes.push({
+          category,
+          amount: maxAmount,
+          description: maxTx.description || 'Merchant',
+          ratio: Math.round((maxAmount / avg) * 10) / 10
+        });
+      }
+    });
+  }
+
+  // Sort spikes to display the most significant ratio first
+  spikes.sort((a, b) => b.ratio - a.ratio);
+
+  // Generate dynamic budget tip
+  let budgetTip = 'Connect a bank feed or add manual transactions to get personalized budget insights.';
+  if (transactions.length > 0 && sortedCategories.length > 0) {
+    const topCategory = sortedCategories[0];
+    const topPercent = totalExpense > 0 ? Math.round((topCategory[1] / totalExpense) * 100) : 0;
+    const catName = topCategory[0];
+    const catTotal = topCategory[1].toLocaleString(undefined, { maximumFractionDigits: 0 });
+
+    if (catName.toLowerCase() === 'dining') {
+      budgetTip = `You spent ${topPercent}% of your budget on Dining (₹${catTotal}). Preparing more meals at home could save you a significant amount this month.`;
+    } else if (catName.toLowerCase() === 'shopping') {
+      budgetTip = `Shopping is your highest variable cost at ${topPercent}% of your budget (₹${catTotal}). Setting a weekly limit could boost your savings.`;
+    } else if (catName.toLowerCase() === 'rent' || catName.toLowerCase() === 'bills') {
+      budgetTip = `Fixed costs (${catName}) represent ${topPercent}% of your budget (₹${catTotal}). Focus on optimizing variable costs (Dining/Shopping) to boost savings.`;
+    } else {
+      budgetTip = `${catName} is your largest expense category this month, representing ${topPercent}% of total expenses (₹${catTotal}).`;
+    }
+  } else if (transactions.length > 0) {
+    budgetTip = `Your total expenses are ₹${totalExpense.toLocaleString(undefined, { maximumFractionDigits: 0 })}. Ask the chatbot "Help me create a savings plan" to optimize your budget.`;
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -70,7 +126,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ transactions }) => {
           </div>
           <div className="stat-info">
             <span className="stat-label">Linked Feeds</span>
-            <span className="stat-value">{uniqueBanks.length} Banks</span>
+            <span className="stat-value">{linkedBanks.length} Bank{linkedBanks.length !== 1 ? 's' : ''}</span>
           </div>
         </div>
       </div>
@@ -171,16 +227,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ transactions }) => {
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.825rem', color: 'var(--text-primary)' }}>
+            {/* Duplicate Charges */}
             <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-              <strong>Duplicate charges detected:</strong> {anomalies.filter(a => a.anomalyStatus === 'DUPLICATE_SUSPECT').length} items found. Ask the chatbot: <em>\"How do I resolve duplicate charges?\"</em> to inspect.
+              {transactions.length === 0 ? (
+                <span>Connect a bank feed or add manual entries to scan for duplicate charges.</span>
+              ) : anomalies.filter(a => a.anomalyStatus === 'DUPLICATE_SUSPECT').length > 0 ? (
+                <span>
+                  <strong>⚠️ Suspected Duplicate Charges:</strong> {anomalies.filter(a => a.anomalyStatus === 'DUPLICATE_SUSPECT').length} items found. Ask the chatbot: <em>"How do I resolve duplicate charges?"</em> to inspect.
+                </span>
+              ) : (
+                <span><strong>✓ No Duplicate Charges:</strong> Your accounts look clean! No duplicate billing events suspected.</span>
+              )}
             </div>
             
+            {/* Spikes */}
             <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-              <strong>Dining Spike:</strong> You had a high Dining charge of ₹8,500 recently. That is higher than your regular swiggy/restaurant runs.
+              {transactions.length === 0 ? (
+                <span>No anomalies detected. Your transactions are within standard parameters.</span>
+              ) : spikes.length > 0 ? (
+                <span>
+                  <strong>🚨 {spikes[0].category} Spike:</strong> You had a high {spikes[0].category} expense of ₹{spikes[0].amount.toLocaleString()} ({spikes[0].description}) recently. That is {spikes[0].ratio}x higher than your average {spikes[0].category} spending.
+                </span>
+              ) : (
+                <span><strong>✓ Spending Spikes:</strong> No sudden spending spikes detected this week. Your transactions are within normal limits.</span>
+              )}
             </div>
 
+            {/* Budget Tip */}
             <div style={{ background: 'rgba(15, 23, 42, 0.4)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-              <strong>Budget tip:</strong> Your Bills and Utilities category is stable. Saving on weekend dining can boost savings by 15% this month!
+              <strong>💡 Budget Tip:</strong> {budgetTip}
             </div>
           </div>
         </div>
