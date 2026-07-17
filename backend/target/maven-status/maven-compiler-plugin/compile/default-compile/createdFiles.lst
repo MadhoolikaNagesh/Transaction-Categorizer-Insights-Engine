@@ -1,0 +1,15 @@
+com\expense\categorizer\controller\ChatController$ChatResponse.class
+com\expense\categorizer\model\Transaction.class
+com\expense\categorizer\ExpenseCategorizerApplication.class
+com\expense\categorizer\controller\ChatController.class
+com\expense\categorizer\repository\TransactionRepository.class
+com\expense\categorizer\service\ChatService.class
+com\expense\categorizer\controller\TransactionController.class
+com\expense\categorizer\repository\TransactionSpecification.class
+com\expense\categorizer\controller\ChatController$ChatRequest.class
+com\expense\categorizer\function\TransactionFunctions$TransactionQueryResponse.class
+com\expense\categorizer\function\TransactionFunctions$TransactionQueryRequest.class
+com\expense\categorizer\service\IngestionService.class
+com\expense\categorizer\service\TransactionService.class
+com\expense\categorizer\model\Transaction$TransactionBuilder.class
+com\expense\categorizer\function\TransactionFunctions.class
