@@ -4,9 +4,10 @@ import { apiService } from '../services/api';
 
 interface AuthPageProps {
   onAuthSuccess: (user: { id: number; username: string }) => void;
+  onBackToHome: () => void;
 }
 
-export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
+export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess, onBackToHome }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -59,7 +60,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
           <div style={styles.logoContainer}>
             <Cpu size={28} style={styles.logoIcon} />
           </div>
-          <h1 style={styles.brandTitle}>Antigravity Finance AI</h1>
+          <h1 style={styles.brandTitle}>FinVertex</h1>
           <p style={styles.brandSubtitle}>Transaction Categorizer & Insights Engine</p>
         </div>
 
@@ -136,6 +137,27 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onAuthSuccess }) => {
             )}
           </button>
         </form>
+
+        <button 
+          onClick={onBackToHome}
+          style={{
+            width: '100%',
+            marginTop: '0.85rem',
+            background: 'none',
+            border: 'none',
+            color: '#6b7280',
+            fontSize: '0.85rem',
+            fontWeight: 500,
+            cursor: 'pointer',
+            textAlign: 'center',
+            display: 'block',
+            transition: 'color 0.2s',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = '#9ca3af')}
+          onMouseLeave={(e) => (e.currentTarget.style.color = '#6b7280')}
+        >
+          ← Back to Home
+        </button>
 
         {/* Features Footer */}
         <div style={styles.footer}>

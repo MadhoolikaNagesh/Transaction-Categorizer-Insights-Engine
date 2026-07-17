@@ -164,10 +164,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ transactions }) => {
         {/* Dynamic Budget Coach Card */}
         <div className="card" style={{ background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(20, 184, 166, 0.05))' }}>
           <h3 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem', color: 'var(--color-accent)' }}>
-            📊 Antigravity AI Spending Analysis
+            📊 FinVertex Spending Analysis
           </h3>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.5', marginBottom: '1rem' }}>
-            Based on your active transactions and bank feeds, the Antigravity Finance assistant can analyze anomalous patterns or recommend savings strategies.
+            Based on your active transactions and bank feeds, the FinVertex assistant can analyze anomalous patterns or recommend savings strategies.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.825rem', color: 'var(--text-primary)' }}>

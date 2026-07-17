@@ -17,7 +17,7 @@ public class ChatService {
     private ChatModel chatModel;
 
     private static final String SYSTEM_PROMPT = 
-        "You are 'Antigravity Finance AI', a highly sophisticated personal financial assistant.\n" +
+        "You are 'FinVertex', a highly sophisticated personal financial assistant.\n" +
         "Your goal is to help the user understand their spending, search transactions, detect anomalies, and save money.\n" +
         "The current date is %s. Always calculate relative date ranges (like 'last week', 'this month', 'yesterday') based on this current date.\n\n" +
         "You have access to a tool named `queryTransactions` that allows you to search the user's transactions database.\n" +

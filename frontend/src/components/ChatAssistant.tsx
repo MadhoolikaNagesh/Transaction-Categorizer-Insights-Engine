@@ -12,7 +12,7 @@ export const ChatAssistant: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'assistant',
-      text: "Hello! I am **Antigravity Finance AI**. I can search, analyze, and monitor your transactions.\n\nAsk me questions like:\n* *'Show me all transactions over ₹5000 last week.'*\n* *'Do I have any duplicate charges?'*\n* *'Tell me what I spent on dining this month.'*",
+      text: "Hello! I am **FinVertex**. I can search, analyze, and monitor your transactions.\n\nAsk me questions like:\n* *'Show me all transactions over ₹5000 last week.'*\n* *'Do I have any duplicate charges?'*\n* *'Tell me what I spent on dining this month.'*",
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -177,7 +177,7 @@ export const ChatAssistant: React.FC = () => {
         <div className="chat-header-status"></div>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '0.9rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-            Antigravity Finance AI <Sparkles size={13} style={{ color: 'var(--color-accent)' }} />
+            FinVertex <Sparkles size={13} style={{ color: 'var(--color-accent)' }} />
           </span>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Spring AI Function Calling Agent</span>
         </div>

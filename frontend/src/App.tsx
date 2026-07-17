@@ -8,6 +8,7 @@ import { ChatAssistant } from './components/ChatAssistant';
 import { PlaidSandbox } from './components/PlaidSandbox';
 import { AccountMenu } from './components/AccountMenu';
 import { AuthPage } from './components/AuthPage';
+import { LandingPage } from './components/LandingPage';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(() => {
@@ -33,6 +34,7 @@ function App() {
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [linkedBanks, setLinkedBanks] = useState<string[]>([]);
   const [isLoadingBanks, setIsLoadingBanks] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
 
   const handleAuthSuccess = (user: { id: number; username: string }) => {
     localStorage.setItem('currentUser', JSON.stringify(user));
@@ -128,7 +130,15 @@ function App() {
   };
 
   if (!currentUser) {
-    return <AuthPage onAuthSuccess={handleAuthSuccess} />;
+    if (!showAuth) {
+      return <LandingPage onGetStarted={() => setShowAuth(true)} />;
+    }
+    return (
+      <AuthPage 
+        onAuthSuccess={handleAuthSuccess} 
+        onBackToHome={() => setShowAuth(false)} 
+      />
+    );
   }
 
   return (
@@ -140,7 +150,7 @@ function App() {
             <Sparkles size={20} />
           </div>
           <div>
-            <h1 className="brand-name">Antigravity Finance AI</h1>
+            <h1 className="brand-name">FinVertex</h1>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Transaction Categorizer &amp; Insights Engine</span>
           </div>
         </div>
