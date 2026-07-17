@@ -1,10 +1,14 @@
+C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\context\UserContext.java
+C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\controller\AuthController.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\controller\ChatController.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\controller\TransactionController.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\ExpenseCategorizerApplication.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\function\TransactionFunctions.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\model\Transaction.java
+C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\model\User.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\repository\TransactionRepository.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\repository\TransactionSpecification.java
+C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\repository\UserRepository.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\service\ChatService.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\service\IngestionService.java
 C:\Users\Wissen\Desktop\STS July\SpringBoot Project\backend\src\main\java\com\expense\categorizer\service\TransactionService.java

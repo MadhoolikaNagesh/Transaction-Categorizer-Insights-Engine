@@ -27,6 +27,47 @@ export interface TransactionFilters {
 }
 
 export const apiService = {
+  getUserId(): string {
+    const userJson = localStorage.getItem('currentUser');
+    if (!userJson) return '';
+    try {
+      const user = JSON.parse(userJson);
+      return user.id ? user.id.toString() : '';
+    } catch {
+      return '';
+    }
+  },
+
+  async login(username: string, password: string): Promise<{ id: number; username: string }> {
+    const response = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Invalid credentials');
+    }
+    return response.json();
+  },
+
+  async register(username: string, password: string): Promise<{ id: number; username: string; message: string }> {
+    const response = await fetch(`${API_BASE}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || 'Registration failed');
+    }
+    return response.json();
+  },
+
   async getTransactions(filters: TransactionFilters = {}): Promise<Transaction[]> {
     const params = new URLSearchParams();
     if (filters.startDate) params.append('startDate', filters.startDate);
@@ -38,7 +79,11 @@ export const apiService = {
     if (filters.anomalyOnly) params.append('anomalyOnly', 'true');
     if (filters.bankName) params.append('bankName', filters.bankName);
 
-    const response = await fetch(`${API_BASE}/transactions?${params.toString()}`);
+    const response = await fetch(`${API_BASE}/transactions?${params.toString()}`, {
+      headers: {
+        'X-User-Id': this.getUserId()
+      }
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch transactions');
     }
@@ -50,6 +95,7 @@ export const apiService = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-User-Id': this.getUserId()
       },
       body: JSON.stringify(transaction),
     });
@@ -62,6 +108,9 @@ export const apiService = {
   async ingestMockFeed(bankName: string): Promise<Transaction[]> {
     const response = await fetch(`${API_BASE}/transactions/ingest/mock?bankName=${encodeURIComponent(bankName)}`, {
       method: 'POST',
+      headers: {
+        'X-User-Id': this.getUserId()
+      }
     });
     if (!response.ok) {
       throw new Error('Failed to ingest mock bank feed');
@@ -72,6 +121,9 @@ export const apiService = {
   async clearTransactions(): Promise<void> {
     const response = await fetch(`${API_BASE}/transactions/clear`, {
       method: 'DELETE',
+      headers: {
+        'X-User-Id': this.getUserId()
+      }
     });
     if (!response.ok) {
       throw new Error('Failed to clear transactions');
@@ -79,7 +131,11 @@ export const apiService = {
   },
 
   async getStats(): Promise<Record<string, number>> {
-    const response = await fetch(`${API_BASE}/transactions/stats`);
+    const response = await fetch(`${API_BASE}/transactions/stats`, {
+      headers: {
+        'X-User-Id': this.getUserId()
+      }
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch stats');
     }
@@ -87,7 +143,11 @@ export const apiService = {
   },
 
   async getAnomalies(): Promise<Transaction[]> {
-    const response = await fetch(`${API_BASE}/transactions/anomalies`);
+    const response = await fetch(`${API_BASE}/transactions/anomalies`, {
+      headers: {
+        'X-User-Id': this.getUserId()
+      }
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch anomalies');
     }
@@ -99,6 +159,7 @@ export const apiService = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'X-User-Id': this.getUserId()
       },
       body: JSON.stringify({ message }),
     });
@@ -110,7 +171,11 @@ export const apiService = {
   },
 
   async getLinkedBanks(): Promise<string[]> {
-    const response = await fetch(`${API_BASE}/transactions/linked-banks`);
+    const response = await fetch(`${API_BASE}/transactions/linked-banks`, {
+      headers: {
+        'X-User-Id': this.getUserId()
+      }
+    });
     if (!response.ok) {
       throw new Error('Failed to fetch linked banks');
     }
@@ -120,6 +185,9 @@ export const apiService = {
   async unlinkBank(bankName: string): Promise<void> {
     const response = await fetch(`${API_BASE}/transactions/unlink?bankName=${encodeURIComponent(bankName)}`, {
       method: 'DELETE',
+      headers: {
+        'X-User-Id': this.getUserId()
+      }
     });
     if (!response.ok) {
       throw new Error('Failed to unlink bank');

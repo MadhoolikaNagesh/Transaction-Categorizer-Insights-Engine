@@ -11,6 +11,7 @@ import java.util.List;
 public class TransactionSpecification {
 
     public static Specification<Transaction> getFilterSpecification(
+            Long userId,
             LocalDate startDate,
             LocalDate endDate,
             Double minAmount,
@@ -22,6 +23,10 @@ public class TransactionSpecification {
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
+            if (userId != null) {
+                predicates.add(cb.equal(root.get("userId"), userId));
+            }
 
             if (startDate != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), startDate));

@@ -30,6 +30,7 @@ public class TransactionController {
 
     @GetMapping
     public ResponseEntity<List<Transaction>> getTransactions(
+            @RequestHeader("X-User-Id") Long userId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @RequestParam(required = false) Double minAmount,
@@ -40,58 +41,66 @@ public class TransactionController {
             @RequestParam(required = false) String bankName
     ) {
         List<Transaction> list = transactionService.getTransactions(
-                startDate, endDate, minAmount, maxAmount, category, search, anomalyOnly, bankName
+                userId, startDate, endDate, minAmount, maxAmount, category, search, anomalyOnly, bankName
         );
         return ResponseEntity.ok(list);
     }
 
     @PostMapping
-    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
+    public ResponseEntity<Transaction> createTransaction(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestBody Transaction transaction
+    ) {
+        transaction.setUserId(userId);
         Transaction saved = transactionService.saveTransaction(transaction);
         return ResponseEntity.ok(saved);
     }
 
     @PostMapping("/ingest/mock")
     public ResponseEntity<List<Transaction>> ingestMock(
+            @RequestHeader("X-User-Id") Long userId,
             @RequestParam(defaultValue = "Plaid Sandbox") String bankName
     ) {
-        List<Transaction> ingested = ingestionService.ingestMockBankFeed(bankName);
+        List<Transaction> ingested = ingestionService.ingestMockBankFeed(userId, bankName);
         return ResponseEntity.ok(ingested);
     }
 
     @DeleteMapping("/clear")
-    public ResponseEntity<Map<String, String>> clearTransactions() {
-        logger.info("TransactionController: Received request to clear all transactions");
-        transactionService.clearAllTransactions();
-        logger.info("TransactionController: Successfully cleared all transactions");
+    public ResponseEntity<Map<String, String>> clearTransactions(@RequestHeader("X-User-Id") Long userId) {
+        logger.info("TransactionController: Received request to clear all transactions for user: {}", userId);
+        transactionService.clearAllTransactions(userId);
+        logger.info("TransactionController: Successfully cleared all transactions for user: {}", userId);
         return ResponseEntity.ok(Map.of("message", "All transactions cleared successfully"));
     }
 
     @DeleteMapping("/unlink")
-    public ResponseEntity<Map<String, String>> unlinkBank(@RequestParam String bankName) {
-        logger.info("TransactionController: Received request to unlink bank: {}", bankName);
-        transactionService.unlinkBank(bankName);
-        logger.info("TransactionController: Successfully unlinked bank: {}", bankName);
+    public ResponseEntity<Map<String, String>> unlinkBank(
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestParam String bankName
+    ) {
+        logger.info("TransactionController: Received request to unlink bank: {} for user: {}", bankName, userId);
+        transactionService.unlinkBank(userId, bankName);
+        logger.info("TransactionController: Successfully unlinked bank: {} for user: {}", bankName, userId);
         return ResponseEntity.ok(Map.of("message", "Bank unlinked successfully: " + bankName));
     }
 
     @GetMapping("/linked-banks")
-    public ResponseEntity<List<String>> getLinkedBanks() {
-        logger.info("TransactionController: Received request to fetch linked banks");
-        List<String> linkedBanks = transactionService.getLinkedBanks();
-        logger.info("TransactionController: Fetched {} linked banks", linkedBanks.size());
+    public ResponseEntity<List<String>> getLinkedBanks(@RequestHeader("X-User-Id") Long userId) {
+        logger.info("TransactionController: Received request to fetch linked banks for user: {}", userId);
+        List<String> linkedBanks = transactionService.getLinkedBanks(userId);
+        logger.info("TransactionController: Fetched {} linked banks for user: {}", linkedBanks.size(), userId);
         return ResponseEntity.ok(linkedBanks);
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<Map<String, Double>> getStats() {
-        return ResponseEntity.ok(transactionService.getCategoryStats());
+    public ResponseEntity<Map<String, Double>> getStats(@RequestHeader("X-User-Id") Long userId) {
+        return ResponseEntity.ok(transactionService.getCategoryStats(userId));
     }
 
     @GetMapping("/anomalies")
-    public ResponseEntity<List<Transaction>> getAnomalies() {
+    public ResponseEntity<List<Transaction>> getAnomalies(@RequestHeader("X-User-Id") Long userId) {
         List<Transaction> anomalies = transactionService.getTransactions(
-                null, null, null, null, null, null, true, null
+                userId, null, null, null, null, null, null, true, null
         );
         return ResponseEntity.ok(anomalies);
     }

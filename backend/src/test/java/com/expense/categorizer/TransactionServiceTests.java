@@ -31,7 +31,7 @@ public class TransactionServiceTests {
 
     @Test
     public void testDuplicateAnomalyDetection() {
-        transactionService.clearAllTransactions();
+        transactionService.clearAllTransactions(1L);
 
         LocalDate today = LocalDate.now();
 
@@ -41,6 +41,7 @@ public class TransactionServiceTests {
                 .description("Starbucks MG Road")
                 .category("Dining")
                 .bankName("Chase")
+                .userId(1L)
                 .build();
 
         Transaction t2 = Transaction.builder()
@@ -49,6 +50,7 @@ public class TransactionServiceTests {
                 .description("Starbucks MG Road")
                 .category("Dining")
                 .bankName("Chase")
+                .userId(1L)
                 .build();
 
         List<Transaction> saved = transactionService.saveTransactions(List.of(t1, t2));
@@ -57,6 +59,6 @@ public class TransactionServiceTests {
         assertEquals("DUPLICATE_SUSPECT", saved.get(0).getAnomalyStatus());
         assertEquals("DUPLICATE_SUSPECT", saved.get(1).getAnomalyStatus());
         
-        transactionService.clearAllTransactions();
+        transactionService.clearAllTransactions(1L);
     }
 }

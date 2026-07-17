@@ -37,4 +37,6 @@ public class Transaction {
     private String accountName; // e.g., "Checking", "Credit Card"
     private String bankName; // e.g., "Chase Sandbox", "Plaid Mock Bank"
     private String originalCategory; // Original raw category from bank feed
+    
+    private Long userId; // The ID of the user who owns this transaction
 }

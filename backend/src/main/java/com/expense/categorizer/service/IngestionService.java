@@ -14,7 +14,7 @@ public class IngestionService {
     @Autowired
     private TransactionService transactionService;
 
-    public List<Transaction> ingestMockBankFeed(String bankName) {
+    public List<Transaction> ingestMockBankFeed(Long userId, String bankName) {
         List<Transaction> mockData = new ArrayList<>();
         LocalDate today = LocalDate.now();
 
@@ -265,6 +265,11 @@ public class IngestionService {
                 .bankName(bankName)
                 .originalCategory("Health")
                 .build());
+
+        // Assign userId to all generated mock transactions
+        for (Transaction t : mockData) {
+            t.setUserId(userId);
+        }
 
         // Save generated mock transactions
         return transactionService.saveTransactions(mockData);

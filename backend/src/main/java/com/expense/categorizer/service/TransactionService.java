@@ -20,6 +20,7 @@ public class TransactionService {
     private TransactionRepository repository;
 
     public List<Transaction> getTransactions(
+            Long userId,
             LocalDate startDate,
             LocalDate endDate,
             Double minAmount,
@@ -30,13 +31,15 @@ public class TransactionService {
             String bankName
     ) {
         Specification<Transaction> spec = TransactionSpecification.getFilterSpecification(
-                startDate, endDate, minAmount, maxAmount, category, descriptionKeyword, anomalyOnly, bankName
+                userId, startDate, endDate, minAmount, maxAmount, category, descriptionKeyword, anomalyOnly, bankName
         );
         return repository.findAll(spec);
     }
 
-    public List<Transaction> getAllTransactions() {
-        return repository.findAll();
+    public List<Transaction> getAllTransactions(Long userId) {
+        return repository.findAll().stream()
+                .filter(t -> userId != null && userId.equals(t.getUserId()))
+                .collect(Collectors.toList());
     }
 
     public Transaction saveTransaction(Transaction transaction) {
@@ -82,16 +85,16 @@ public class TransactionService {
         return repository.saveAll(savedList);
     }
 
-    public void clearAllTransactions() {
-        repository.deleteAll();
+    public void clearAllTransactions(Long userId) {
+        repository.deleteByUserId(userId);
     }
 
-    public void unlinkBank(String bankName) {
-        repository.deleteByBankName(bankName);
+    public void unlinkBank(Long userId, String bankName) {
+        repository.deleteByUserIdAndBankName(userId, bankName);
     }
 
-    public List<String> getLinkedBanks() {
-        return repository.findDistinctBankNames();
+    public List<String> getLinkedBanks(Long userId) {
+        return repository.findDistinctBankNamesByUserId(userId);
     }
 
     public Optional<Transaction> getTransactionById(Long id) {
@@ -99,19 +102,26 @@ public class TransactionService {
     }
 
     public void runBatchAnomalyDetection(List<Transaction> transactions) {
-        // Detect duplicates
-        List<Transaction> allTransactions = repository.findAll();
+        if (transactions.isEmpty()) return;
+        Long userId = transactions.get(0).getUserId();
+        // Detect duplicates only within this user's data
+        List<Transaction> userTransactions = repository.findAll().stream()
+                .filter(t -> userId != null && userId.equals(t.getUserId()))
+                .collect(Collectors.toList());
         for (Transaction t1 : transactions) {
-            detectDuplicate(t1, allTransactions);
-            detectSpike(t1, allTransactions);
+            detectDuplicate(t1, userTransactions);
+            detectSpike(t1, userTransactions);
             detectHighValue(t1);
         }
     }
 
     private void runAnomalyDetection(Transaction transaction) {
-        List<Transaction> allTransactions = repository.findAll();
-        detectDuplicate(transaction, allTransactions);
-        detectSpike(transaction, allTransactions);
+        Long userId = transaction.getUserId();
+        List<Transaction> userTransactions = repository.findAll().stream()
+                .filter(t -> userId != null && userId.equals(t.getUserId()))
+                .collect(Collectors.toList());
+        detectDuplicate(transaction, userTransactions);
+        detectSpike(transaction, userTransactions);
         detectHighValue(transaction);
     }
 
@@ -215,8 +225,10 @@ public class TransactionService {
         return "Uncategorized";
     }
 
-    public Map<String, Double> getCategoryStats() {
-        List<Transaction> transactions = repository.findAll();
+    public Map<String, Double> getCategoryStats(Long userId) {
+        List<Transaction> transactions = repository.findAll().stream()
+                .filter(t -> userId != null && userId.equals(t.getUserId()))
+                .collect(Collectors.toList());
         return transactions.stream()
                 .filter(t -> t.getAmount() != null && t.getCategory() != null && !"Income".equalsIgnoreCase(t.getCategory()))
                 .collect(Collectors.groupingBy(

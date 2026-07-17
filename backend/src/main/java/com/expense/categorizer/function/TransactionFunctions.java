@@ -37,8 +37,10 @@ public class TransactionFunctions {
         return request -> {
             LocalDate start = parseDate(request.startDate());
             LocalDate end = parseDate(request.endDate());
+            Long userId = com.expense.categorizer.context.UserContext.getUserId();
             
             List<Transaction> list = transactionService.getTransactions(
+                    userId,
                     start,
                     end,
                     request.minAmount(),

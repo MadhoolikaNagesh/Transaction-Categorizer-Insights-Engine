@@ -15,15 +15,20 @@ import java.util.List;
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Long>, JpaSpecificationExecutor<Transaction> {
     
-    List<Transaction> findByAnomalyStatusNot(String anomalyStatus);
+    List<Transaction> findByUserIdAndAnomalyStatusNot(Long userId, String anomalyStatus);
     
-    List<Transaction> findByCategory(String category);
+    List<Transaction> findByUserIdAndCategory(Long userId, String category);
 
     @Modifying
     @Transactional
-    @Query("DELETE FROM Transaction t WHERE t.bankName = :bankName")
-    void deleteByBankName(@Param("bankName") String bankName);
+    @Query("DELETE FROM Transaction t WHERE t.userId = :userId AND t.bankName = :bankName")
+    void deleteByUserIdAndBankName(@Param("userId") Long userId, @Param("bankName") String bankName);
 
-    @Query("SELECT DISTINCT t.bankName FROM Transaction t WHERE t.bankName IS NOT NULL AND t.bankName <> ''")
-    List<String> findDistinctBankNames();
+    @Query("SELECT DISTINCT t.bankName FROM Transaction t WHERE t.userId = :userId AND t.bankName IS NOT NULL AND t.bankName <> ''")
+    List<String> findDistinctBankNamesByUserId(@Param("userId") Long userId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Transaction t WHERE t.userId = :userId")
+    void deleteByUserId(@Param("userId") Long userId);
 }

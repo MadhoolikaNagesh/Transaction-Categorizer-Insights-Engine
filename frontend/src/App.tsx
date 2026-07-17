@@ -7,8 +7,21 @@ import { TransactionList } from './components/TransactionList';
 import { ChatAssistant } from './components/ChatAssistant';
 import { PlaidSandbox } from './components/PlaidSandbox';
 import { AccountMenu } from './components/AccountMenu';
+import { AuthPage } from './components/AuthPage';
 
 function App() {
+  const [currentUser, setCurrentUser] = useState<{ id: number; username: string } | null>(() => {
+    const saved = localStorage.getItem('currentUser');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [filters, setFilters] = useState<TransactionFilters>({
     search: '',
@@ -20,6 +33,19 @@ function App() {
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [linkedBanks, setLinkedBanks] = useState<string[]>([]);
   const [isLoadingBanks, setIsLoadingBanks] = useState(false);
+
+  const handleAuthSuccess = (user: { id: number; username: string }) => {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+    setCurrentUser(user);
+  };
+
+  const handleLogout = () => {
+    console.log("App: Logging out user:", currentUser);
+    localStorage.removeItem('currentUser');
+    setCurrentUser(null);
+    setTransactions([]);
+    setLinkedBanks([]);
+  };
 
   const loadTransactions = async () => {
     setIsLoading(true);
@@ -47,15 +73,19 @@ function App() {
     }
   };
 
-  // Reload transactions when filters or search inputs change
+  // Reload transactions when filters or search inputs change, and user is logged in
   useEffect(() => {
-    loadTransactions();
-  }, [filters]);
+    if (currentUser) {
+      loadTransactions();
+    }
+  }, [filters, currentUser]);
 
-  // Load linked banks on mount
+  // Load linked banks on mount, and user is logged in
   useEffect(() => {
-    loadLinkedBanks();
-  }, []);
+    if (currentUser) {
+      loadLinkedBanks();
+    }
+  }, [currentUser]);
 
   const handlePlaidSuccess = async (bankName: string) => {
     try {
@@ -97,6 +127,10 @@ function App() {
     }
   };
 
+  if (!currentUser) {
+    return <AuthPage onAuthSuccess={handleAuthSuccess} />;
+  }
+
   return (
     <div className="app-container">
       {/* Header */}
@@ -131,6 +165,8 @@ function App() {
             onDeleteAccount={handleDeleteAccount}
             linkedBanks={linkedBanks}
             isLoadingBanks={isLoadingBanks}
+            onLogout={handleLogout}
+            currentUser={currentUser}
           />
         </div>
       </header>

@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  UserCircle2,
   Link2,
   Unlink,
   Trash2,
@@ -10,6 +9,7 @@ import {
   CheckCircle2,
   Loader2,
   X,
+  LogOut,
 } from 'lucide-react';
 
 interface AccountMenuProps {
@@ -18,6 +18,8 @@ interface AccountMenuProps {
   onDeleteAccount: () => Promise<void>;
   linkedBanks: string[];
   isLoadingBanks: boolean;
+  onLogout: () => void;
+  currentUser: { id: number; username: string };
 }
 
 type MenuView = 'main' | 'unlink' | 'delete-confirm';
@@ -28,6 +30,8 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   onDeleteAccount,
   linkedBanks,
   isLoadingBanks,
+  onLogout,
+  currentUser,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<MenuView>('main');
@@ -142,12 +146,16 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            color: '#fff',
+            fontSize: '0.8rem',
+            fontWeight: 700,
+            textTransform: 'uppercase'
           }}
         >
-          <UserCircle2 size={18} color="#fff" />
+          {currentUser.username.charAt(0)}
         </div>
         <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-          Account
+          {currentUser.username}
         </span>
         <ChevronDown
           size={13}
@@ -188,7 +196,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
               justifyContent: 'space-between',
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
               <div
                 style={{
                   width: '36px',
@@ -198,13 +206,17 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  color: '#fff',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  textTransform: 'uppercase'
                 }}
               >
-                <UserCircle2 size={20} color="#fff" />
+                {currentUser.username.charAt(0)}
               </div>
               <div>
-                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                  My Account
+                <div style={{ fontSize: '0.85rem', fontWeight: 600, textTransform: 'capitalize' }}>
+                  {currentUser.username}
                 </div>
                 <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
                   {linkedBanks.length} bank{linkedBanks.length !== 1 ? 's' : ''} linked
@@ -297,6 +309,25 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
                 <div>
                   <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>Delete Account Data</div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>Clear all transactions & feeds</div>
+                </div>
+              </button>
+
+              {/* Divider */}
+              <div style={{ height: '1px', background: 'var(--border-color)', margin: '0.4rem 0' }} />
+
+              {/* Logout */}
+              <button
+                id="account-logout-btn"
+                onClick={onLogout}
+                className="account-menu-item"
+                style={{ color: '#9ca3af' }}
+              >
+                <div className="account-menu-item-icon" style={{ background: 'rgba(255,255,255,0.06)', color: '#9ca3af' }}>
+                  <LogOut size={15} />
+                </div>
+                <div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 600 }}>Log Out</div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>End your secure session</div>
                 </div>
               </button>
             </div>
