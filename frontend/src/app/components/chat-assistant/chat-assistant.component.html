@@ -1,0 +1,58 @@
+<div class="chat-widget">
+  <div class="chat-header" style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+    <div style="display:flex;align-items:center;gap:0.75rem;">
+      <div class="chat-header-status"></div>
+      <div style="display:flex;flex-direction:column;">
+        <span style="font-size:0.9rem;font-weight:700;display:flex;align-items:center;gap:0.25rem;">
+          FinVertex
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        </span>
+        <span style="font-size:0.7rem;color:var(--text-muted);">Spring AI Function Calling Agent</span>
+      </div>
+    </div>
+    <button (click)="closeChat.emit()" class="chat-close-btn" aria-label="Close Chat">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+    </button>
+  </div>
+
+  <div class="chat-messages">
+    @for (msg of messages(); track $index) {
+      <div [class]="'chat-message ' + msg.sender">
+        <div class="message-bubble" [innerHTML]="msg.html || msg.text"></div>
+        <span class="message-time">{{ msg.time }}</span>
+      </div>
+    }
+    @if (isLoading()) {
+      <div class="chat-message assistant">
+        <div class="message-bubble" style="padding:0.5rem;">
+          <div class="ai-typing-indicator">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      </div>
+    }
+    <div #messagesEnd></div>
+  </div>
+
+  <!-- Quick Prompts -->
+  <div style="padding:0.5rem 1rem;display:flex;flex-wrap:wrap;gap:0.35rem;border-top:1px solid var(--border-color);background:rgba(15,23,42,0.15);">
+    @for (p of quickPrompts; track p) {
+      <button (click)="handleQuickPrompt(p)" class="filter-input"
+        style="font-size:0.75rem;padding:0.25rem 0.5rem;cursor:pointer;border-radius:20px;border:1px solid rgba(255,255,255,0.08);">
+        {{ p }}
+      </button>
+    }
+  </div>
+
+  <!-- Chat Input -->
+  <form (ngSubmit)="handleSend($event)" class="chat-input-form">
+    <input type="text" [value]="input()" (input)="setInput($any($event.target).value)"
+      placeholder="Ask AI (e.g. 'what did I spend on cafes last week?')..."
+      class="chat-input" [disabled]="isLoading()" />
+    <button type="submit" class="btn btn-primary" style="padding:0.75rem;" [disabled]="isLoading()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+    </button>
+  </form>
+</div>

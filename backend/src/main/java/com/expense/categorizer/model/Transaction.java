@@ -39,4 +39,5 @@ public class Transaction {
     private String originalCategory; // Original raw category from bank feed
     
     private Long userId; // The ID of the user who owns this transaction
+    private String type; // Either "CREDIT" or "DEBIT"
 }
