@@ -1,0 +1,156 @@
+<div style="min-height:100vh;width:100vw;background-color:#030712;color:#f3f4f6;font-family:'Outfit','Inter',sans-serif;position:relative;overflow-x:hidden;padding-bottom:4rem;">
+  <!-- Background Decorative Grid and Blobs -->
+  <div style="position:absolute;top:0;left:0;right:0;bottom:0;background-image:radial-gradient(rgba(255,255,255,0.015) 1px,transparent 1px);background-size:24px 24px;pointer-events:none;z-index:1;"></div>
+  <div style="position:absolute;border-radius:50%;filter:blur(100px);opacity:0.12;z-index:1;pointer-events:none;top:10%;right:5%;width:500px;height:500px;background:#6366f1;"></div>
+  <div style="position:absolute;border-radius:50%;filter:blur(100px);opacity:0.12;z-index:1;pointer-events:none;bottom:20%;left:10%;width:450px;height:450px;background:#14b8a6;"></div>
+
+  <!-- Navigation Header -->
+  <header style="position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;padding:1.5rem 3rem;max-width:1200px;margin:0 auto;">
+    <div style="display:flex;align-items:center;gap:0.65rem;">
+      <div style="background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(20,184,166,0.2));padding:0.5rem;border-radius:10px;border:1px solid rgba(255,255,255,0.08);">
+        <!-- Sparkles icon SVG -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+      </div>
+      <span style="font-size:1.15rem;font-weight:700;background:linear-gradient(to right,#fff,#d1d5db);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">FinVertex</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:2.5rem;">
+      <a href="#features" style="color:#9ca3af;font-size:0.9rem;font-weight:500;text-decoration:none;">Features</a>
+      <a href="#tech" style="color:#9ca3af;font-size:0.9rem;font-weight:500;text-decoration:none;">Technology</a>
+      <button (click)="onGetStarted()" style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;color:#fff;padding:0.5rem 1.25rem;font-size:0.85rem;font-weight:600;cursor:pointer;">Sign In</button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section style="position:relative;z-index:10;max-width:800px;margin:4rem auto 6rem;text-align:center;padding:0 2rem;">
+    <div style="display:inline-flex;align-items:center;background:rgba(20,184,166,0.08);border:1px solid rgba(20,184,166,0.15);border-radius:9999px;padding:0.35rem 1rem;font-size:0.75rem;font-weight:500;color:#14b8a6;margin-bottom:2rem;">
+      <!-- Cpu icon -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#14b8a6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.5rem;"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></svg>
+      Autonomous Finance Engine v1.0
+    </div>
+
+    <h1 style="font-size:3.75rem;font-weight:800;line-height:1.15;letter-spacing:-0.03em;margin-bottom:1.5rem;">
+      Financial Intelligence <br>
+      <span style="background:linear-gradient(135deg,#818cf8,#14b8a6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Redefined by AI</span>
+    </h1>
+
+    <p style="font-size:1.15rem;color:#9ca3af;line-height:1.6;margin-bottom:2.5rem;padding:0 1rem;">
+      Connect feeds, automatically categorize expenses, isolate anomalies, and talk to your financial ledger in plain English. Powered by advanced neural categorization and Spring AI.
+    </p>
+
+    <div style="display:flex;justify-content:center;gap:1rem;margin-bottom:5rem;">
+      <button (click)="onGetStarted()" style="background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;border-radius:12px;color:#fff;padding:0.9rem 1.75rem;font-size:0.95rem;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(99,102,241,0.25);display:flex;align-items:center;">
+        Get Started Free
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left:0.5rem;"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </button>
+      <a href="#features" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;color:#d1d5db;padding:0.9rem 1.75rem;font-size:0.95rem;font-weight:600;text-decoration:none;display:flex;align-items:center;">
+        Learn More
+      </a>
+    </div>
+
+    <!-- Live System Preview Frame -->
+    <div style="background:rgba(15,23,42,0.4);border:1px solid rgba(255,255,255,0.08);border-radius:16px;overflow:hidden;box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);text-align:left;">
+      <div style="background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.06);padding:0.75rem 1rem;display:flex;align-items:center;">
+        <div style="display:flex;gap:0.35rem;">
+          <span style="width:9px;height:9px;border-radius:50%;background:#ef4444;display:inline-block;"></span>
+          <span style="width:9px;height:9px;border-radius:50%;background:#eab308;display:inline-block;"></span>
+          <span style="width:9px;height:9px;border-radius:50%;background:#22c55e;display:inline-block;"></span>
+        </div>
+        <div style="font-size:0.72rem;color:#6b7280;margin:0 auto;padding-right:2.5rem;">finvertex.ai/dashboard</div>
+      </div>
+      <div style="padding:1.5rem;display:flex;flex-direction:column;gap:1.25rem;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:0.85rem 1rem;">
+            <div style="font-size:0.75rem;color:var(--text-muted);">AI Auto-Categorized</div>
+            <div style="font-size:1.25rem;font-weight:700;margin:0.25rem 0;">₹1,20,000.00</div>
+            <span style="font-size:0.68rem;background:rgba(34,197,94,0.1);color:#4ade80;padding:0.15rem 0.5rem;border-radius:9999px;font-weight:600;">100% Sorted</span>
+          </div>
+          <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:0.85rem 1rem;">
+            <div style="font-size:0.75rem;color:var(--text-muted);">Anomalies Flagged</div>
+            <div style="font-size:1.25rem;font-weight:700;margin:0.25rem 0;color:#ef4444;">6 Alerts</div>
+            <span style="font-size:0.68rem;background:rgba(239,68,68,0.1);color:#f87171;padding:0.15rem 0.5rem;border-radius:9999px;font-weight:600;">High Severity</span>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:10px;padding:0.75rem 1rem;">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <div style="width:8px;height:8px;border-radius:50%;background:#6366f1;"></div>
+            <span style="font-size:0.8rem;font-weight:500;">Starbucks Coffee</span>
+          </div>
+          <span style="font-size:0.68rem;background:rgba(99,102,241,0.1);color:#818cf8;padding:0.15rem 0.5rem;border-radius:9999px;font-weight:600;">Dining</span>
+          <span style="font-size:0.8rem;font-weight:700;">₹380.00</span>
+          <span style="font-size:0.68rem;background:rgba(245,158,11,0.1);color:#fbbf24;padding:0.15rem 0.5rem;border-radius:9999px;font-weight:600;">Duplicate Suspect</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" style="max-width:1200px;margin:0 auto 8rem;padding:0 2rem;position:relative;z-index:10;">
+    <div style="text-align:center;margin-bottom:4rem;">
+      <h2 style="font-size:2.25rem;font-weight:700;margin-bottom:1rem;letter-spacing:-0.02em;">Engineered for Autonomous Wealth Tracking</h2>
+      <p style="font-size:1rem;color:#9ca3af;max-width:600px;margin:0 auto;line-height:1.6;">Say goodbye to manual expense tracking. Our AI works in the background to analyze every line of your financial statement.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;">
+      <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:18px;padding:2rem 1.75rem;">
+        <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,0.06);background:rgba(99,102,241,0.15);color:#818cf8;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></svg>
+        </div>
+        <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:0.75rem;">Autonomous Categorization</h3>
+        <p style="font-size:0.88rem;color:#9ca3af;line-height:1.6;">Neural-inference engines parse raw transaction strings and assign appropriate transaction tags dynamically.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:18px;padding:2rem 1.75rem;">
+        <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,0.06);background:rgba(239,68,68,0.15);color:#ef4444;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+        </div>
+        <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:0.75rem;">Anomaly Safeguard</h3>
+        <p style="font-size:0.88rem;color:#9ca3af;line-height:1.6;">Instantly flags double-billing, massive spending spikes, or transaction activities outside normal parameters.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:18px;padding:2rem 1.75rem;">
+        <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,0.06);background:rgba(20,184,166,0.15);color:#14b8a6;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/></svg>
+        </div>
+        <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:0.75rem;">Conversational Finance</h3>
+        <p style="font-size:0.88rem;color:#9ca3af;line-height:1.6;">Ask our financial chatbot complex queries about your balance, trends, and budget in plain conversational English.</p>
+      </div>
+      <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:18px;padding:2rem 1.75rem;">
+        <div style="width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,0.06);background:rgba(245,158,11,0.15);color:#f59e0b;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        </div>
+        <h3 style="font-size:1.1rem;font-weight:600;margin-bottom:0.75rem;">Multi-User Ledger Isolation</h3>
+        <p style="font-size:0.88rem;color:#9ca3af;line-height:1.6;">Persist credentials and statements securely, ensuring complete data partitions and transaction isolation between profiles.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tech Stack Section -->
+  <section id="tech" style="max-width:1200px;margin:0 auto 8rem;padding:0 2rem;position:relative;z-index:10;">
+    <div style="text-align:center;margin-bottom:4rem;">
+      <h2 style="font-size:2.25rem;font-weight:700;margin-bottom:1rem;letter-spacing:-0.02em;">Built on a High-Performance Tech Stack</h2>
+      <p style="font-size:1rem;color:#9ca3af;max-width:600px;margin:0 auto;line-height:1.6;">We leverage modern cloud computing and enterprise-grade microservice architecture.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.25rem;">
+      <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:0.5rem;">
+        <span style="font-size:0.72rem;text-transform:uppercase;color:#6b7280;letter-spacing:0.05em;font-weight:600;">Frontend</span>
+        <div style="font-size:1.05rem;font-weight:600;color:#ffffff;">Angular 18 + TypeScript</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:0.5rem;">
+        <span style="font-size:0.72rem;text-transform:uppercase;color:#6b7280;letter-spacing:0.05em;font-weight:600;">Backend Core</span>
+        <div style="font-size:1.05rem;font-weight:600;color:#ffffff;">Spring Boot 3 + Java 21</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:0.5rem;">
+        <span style="font-size:0.72rem;text-transform:uppercase;color:#6b7280;letter-spacing:0.05em;font-weight:600;">Cognitive Intelligence</span>
+        <div style="font-size:1.05rem;font-weight:600;color:#ffffff;">Spring AI + OpenAI</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.01);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:1.5rem;display:flex;flex-direction:column;gap:0.5rem;">
+        <span style="font-size:0.72rem;text-transform:uppercase;color:#6b7280;letter-spacing:0.05em;font-weight:600;">Cloud Database</span>
+        <div style="font-size:1.05rem;font-weight:600;color:#ffffff;">Aiven PostgreSQL</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer style="max-width:1200px;margin:4rem auto 0;border-top:1px solid rgba(255,255,255,0.04);padding:2rem 2rem 0;text-align:center;">
+    <p style="font-size:0.8rem;color:var(--text-muted);">
+      &copy; {{ currentYear }} FinVertex. Secured by AES-256 bank-grade protocol encryption.
+    </p>
+  </footer>
+</div>

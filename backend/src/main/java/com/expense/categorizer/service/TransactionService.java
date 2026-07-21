@@ -127,9 +127,13 @@ public class TransactionService {
 
     private void detectDuplicate(Transaction target, List<Transaction> searchPool) {
         if (target.getAmount() == null || target.getDate() == null) return;
+        if ("CREDIT".equals(target.getType())) return;
         
         for (Transaction other : searchPool) {
             if (other.getId() != null && target.getId() != null && other.getId().equals(target.getId())) {
+                continue;
+            }
+            if ("CREDIT".equals(other.getType())) {
                 continue;
             }
             
@@ -156,10 +160,12 @@ public class TransactionService {
 
     private void detectSpike(Transaction target, List<Transaction> searchPool) {
         if (target.getCategory() == null || target.getAmount() == null) return;
+        if ("CREDIT".equals(target.getType())) return;
         if ("DUPLICATE_SUSPECT".equals(target.getAnomalyStatus())) return; // duplicates take priority
 
-        // Get average amount for this category
+        // Get average amount for this category (excluding credits)
         List<Transaction> categoryTransactions = searchPool.stream()
+                .filter(t -> !"CREDIT".equals(t.getType()))
                 .filter(t -> target.getCategory().equalsIgnoreCase(t.getCategory()))
                 .filter(t -> t.getId() != null && !t.getId().equals(target.getId()))
                 .collect(Collectors.toList());
@@ -180,6 +186,7 @@ public class TransactionService {
     }
 
     private void detectHighValue(Transaction target) {
+        if ("CREDIT".equals(target.getType())) return;
         if ("DUPLICATE_SUSPECT".equals(target.getAnomalyStatus()) || "HIGH_SPIKE".equals(target.getAnomalyStatus())) {
             return;
         }

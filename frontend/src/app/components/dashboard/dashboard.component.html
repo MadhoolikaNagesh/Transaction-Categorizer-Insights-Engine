@@ -1,0 +1,134 @@
+<div style="display:flex;flex-direction:column;gap:1.5rem;">
+
+  <!-- Stat Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon primary">
+        <!-- TrendingDown -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Total Expenses</span>
+        <span class="stat-value">₹{{ formatCurrency(totalExpense) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon success">
+        <!-- TrendingUp -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Total Income</span>
+        <span class="stat-value">₹{{ formatCurrency(totalIncome) }}</span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon danger">
+        <!-- AlertTriangle -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Anomalies</span>
+        <span class="stat-value" [style.color]="anomalies.length > 0 ? 'var(--color-danger)' : 'var(--text-primary)'">
+          {{ anomalies.length }} Flagged
+        </span>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon accent">
+        <!-- Building -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
+      </div>
+      <div class="stat-info">
+        <span class="stat-label">Linked Feeds</span>
+        <span class="stat-value">{{ linkedBankCount() }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anomaly Alerts -->
+  @if (anomalies.length > 0) {
+    <div class="card" style="border-color:rgba(244,63,94,0.3);background:rgba(244,63,94,0.05);border-left:4px solid var(--color-danger);">
+      <h3 style="font-size:1rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;color:var(--color-danger);">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+        Financial Anomaly Alerts Detected
+      </h3>
+      <div style="display:flex;flex-direction:column;gap:0.5rem;">
+        @for (t of anomalies; track t.id) {
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0.75rem;background:rgba(15,23,42,0.4);border:1px solid rgba(244,63,94,0.1);border-radius:6px;font-size:0.85rem;">
+            <div>
+              <span style="font-weight:700;color:#fff;">{{ t.description }}</span> -
+              <span style="color:var(--text-secondary);margin-left:0.25rem;">{{ t.anomalyDescription }}</span>
+            </div>
+            <span style="font-weight:800;color:var(--color-danger);white-space:nowrap;">₹{{ t.amount }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Category Breakdown + AI Summary Grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.5rem;">
+
+    <!-- Category Breakdown -->
+    <div class="card">
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Spending by Category</h3>
+      @if (sortedCategories.length === 0) {
+        <p style="font-size:0.85rem;color:var(--text-muted);text-align:center;padding:2rem 0;">
+          No expense data available. Sync your accounts to populate categories.
+        </p>
+      } @else {
+        <div style="display:flex;flex-direction:column;gap:1rem;">
+          @for (cat of sortedCategories; track cat.category) {
+            <div style="display:flex;flex-direction:column;gap:0.35rem;">
+              <div style="display:flex;justify-content:space-between;font-size:0.85rem;">
+                <span style="font-weight:600;">{{ cat.category }}</span>
+                <span style="font-weight:700;">
+                  ₹{{ cat.amount.toLocaleString() }}
+                  <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;margin-left:0.35rem;">({{ cat.percentage.toFixed(0) }}%)</span>
+                </span>
+              </div>
+              <div style="width:100%;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
+                <div [style.width]="cat.percentage + '%'" [style.background]="cat.color" style="height:100%;border-radius:4px;"></div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- AI Budget Analysis Card -->
+    <div class="card" style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(20,184,166,0.05));">
+      <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;color:var(--color-accent);">📊 FinVertex Spending Analysis</h3>
+      <p style="font-size:0.85rem;color:var(--text-secondary);line-height:1.5;margin-bottom:1rem;">
+        Based on your active transactions and bank feeds, the FinVertex assistant can analyze anomalous patterns or recommend savings strategies.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:0.75rem;font-size:0.825rem;color:var(--text-primary);">
+        <div style="background:rgba(15,23,42,0.4);padding:0.75rem;border-radius:8px;border:1px solid var(--border-color);">
+          @if (transactions.length === 0) {
+            <span>Connect a bank feed or add manual entries to scan for duplicate charges.</span>
+          } @else if (duplicateCount > 0) {
+            <span><strong>⚠️ Suspected Duplicate Charges:</strong> {{ duplicateCount }} items found. Ask the chatbot: <em>"How do I resolve duplicate charges?"</em> to inspect.</span>
+          } @else {
+            <span><strong>✓ No Duplicate Charges:</strong> Your accounts look clean! No duplicate billing events suspected.</span>
+          }
+        </div>
+        <div style="background:rgba(15,23,42,0.4);padding:0.75rem;border-radius:8px;border:1px solid var(--border-color);">
+          @if (transactions.length === 0) {
+            <span>No anomalies detected. Your transactions are within standard parameters.</span>
+          } @else if (spikes.length > 0) {
+            <span><strong>🚨 {{ spikes[0].category }} Spike:</strong> You had a high {{ spikes[0].category }} expense of ₹{{ spikes[0].amount.toLocaleString() }} ({{ spikes[0].description }}) recently. That is {{ spikes[0].ratio }}x higher than your average spending.</span>
+          } @else {
+            <span><strong>✓ Spending Spikes:</strong> No sudden spending spikes detected this week. Your transactions are within normal limits.</span>
+          }
+        </div>
+        <div style="background:rgba(15,23,42,0.4);padding:0.75rem;border-radius:8px;border:1px solid var(--border-color);">
+          <strong>💡 Budget Tip:</strong> {{ budgetTip }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

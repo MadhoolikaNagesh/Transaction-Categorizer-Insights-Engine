@@ -31,6 +31,7 @@ public class IngestionService {
                 .bankName(bankName)
                 .originalCategory("Payroll")
                 .notes("Monthly salary credit")
+                .type("CREDIT")
                 .build());
 
         // 2. Rent (2nd of current month)
@@ -266,9 +267,39 @@ public class IngestionService {
                 .originalCategory("Health")
                 .build());
 
-        // Assign userId to all generated mock transactions
+        // 11. Additional Credits (Refund and Dividends)
+        mockData.add(Transaction.builder()
+                .amount(1500.0)
+                .currency("INR")
+                .date(today.minusDays(5))
+                .description("Amazon Refund - Apparel Return")
+                .merchant("Amazon")
+                .category("Shopping")
+                .accountName("Credit Card")
+                .bankName(bankName)
+                .originalCategory("E-Commerce")
+                .type("CREDIT")
+                .build());
+
+        mockData.add(Transaction.builder()
+                .amount(3500.0)
+                .currency("INR")
+                .date(today.minusDays(15))
+                .description("Dividend Payout - Groww Mutual Fund")
+                .merchant("Groww")
+                .category("Income")
+                .accountName("Checking Account")
+                .bankName(bankName)
+                .originalCategory("Investments")
+                .type("CREDIT")
+                .build());
+
+        // Assign userId to all generated mock transactions and set default type to DEBIT
         for (Transaction t : mockData) {
             t.setUserId(userId);
+            if (t.getType() == null) {
+                t.setType("DEBIT");
+            }
         }
 
         // Save generated mock transactions

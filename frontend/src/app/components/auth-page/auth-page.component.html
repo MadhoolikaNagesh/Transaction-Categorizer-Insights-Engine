@@ -1,0 +1,103 @@
+<div style="display:flex;align-items:center;justify-content:center;min-height:100vh;width:100vw;position:fixed;top:0;left:0;background:radial-gradient(circle at top right,#111827,#030712);font-family:'Outfit','Inter',sans-serif;color:#f3f4f6;z-index:9999;overflow:hidden;">
+  <!-- Background Blobs -->
+  <div style="position:absolute;border-radius:50%;filter:blur(90px);opacity:0.14;z-index:1;pointer-events:none;top:20%;left:15%;width:350px;height:350px;background:#6366f1;"></div>
+  <div style="position:absolute;border-radius:50%;filter:blur(90px);opacity:0.14;z-index:1;pointer-events:none;bottom:20%;right:15%;width:400px;height:400px;background:#14b8a6;"></div>
+
+  <div style="position:relative;z-index:10;width:100%;max-width:430px;padding:2.5rem 2rem;background:rgba(15,23,42,0.45);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.08);border-radius:24px;box-shadow:0 24px 60px rgba(0,0,0,0.6);animation:authFadeIn 0.5s ease;">
+
+    <!-- Logo Section -->
+    <div style="display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:2rem;">
+      <div style="background:linear-gradient(135deg,rgba(99,102,241,0.15),rgba(20,184,166,0.15));padding:0.85rem;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:1rem;border:1px solid rgba(255,255,255,0.06);">
+        <!-- Cpu icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2"/></svg>
+      </div>
+      <h1 style="font-size:1.5rem;font-weight:700;letter-spacing:-0.025em;margin-bottom:0.35rem;background:linear-gradient(to right,#ffffff,#9ca3af);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">FinVertex</h1>
+      <p style="font-size:0.8rem;color:#9ca3af;">Transaction Categorizer &amp; Insights Engine</p>
+    </div>
+
+    <!-- Tabs -->
+    <div style="display:flex;background:rgba(255,255,255,0.03);border-radius:12px;padding:0.25rem;margin-bottom:1.5rem;border:1px solid rgba(255,255,255,0.04);">
+      <button
+        (click)="setIsLogin(true)"
+        [style.background]="isLogin() ? 'rgba(255,255,255,0.08)' : 'none'"
+        [style.color]="isLogin() ? '#ffffff' : '#9ca3af'"
+        [style.fontWeight]="isLogin() ? '600' : '500'"
+        style="flex:1;padding:0.6rem 0;border:none;border-radius:10px;font-size:0.88rem;cursor:pointer;transition:all 0.2s ease;">
+        Log In
+      </button>
+      <button
+        (click)="setIsLogin(false)"
+        [style.background]="!isLogin() ? 'rgba(255,255,255,0.08)' : 'none'"
+        [style.color]="!isLogin() ? '#ffffff' : '#9ca3af'"
+        [style.fontWeight]="!isLogin() ? '600' : '500'"
+        style="flex:1;padding:0.6rem 0;border:none;border-radius:10px;font-size:0.88rem;cursor:pointer;transition:all 0.2s ease;">
+        Register
+      </button>
+    </div>
+
+    <!-- Error Banner -->
+    @if (error()) {
+      <div style="display:flex;align-items:center;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.25);border-radius:12px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.82rem;color:#ef4444;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.5rem;flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+        <span>{{ error() }}</span>
+      </div>
+    }
+
+    <!-- Auth Form -->
+    <form (ngSubmit)="handleSubmit($event)" style="display:flex;flex-direction:column;gap:1.25rem;">
+      <div style="display:flex;flex-direction:column;gap:0.45rem;">
+        <label style="font-size:0.8rem;font-weight:600;color:#9ca3af;letter-spacing:0.025em;">Username</label>
+        <div style="position:relative;display:flex;align-items:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:1rem;"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" placeholder="Enter your username"
+            [value]="username()"
+            (input)="setUsername($any($event.target).value)"
+            [disabled]="isLoading()"
+            style="width:100%;padding:0.85rem 1rem 0.85rem 2.75rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;color:#ffffff;font-size:0.9rem;outline:none;" required />
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:0.45rem;">
+        <label style="font-size:0.8rem;font-weight:600;color:#9ca3af;letter-spacing:0.025em;">Password</label>
+        <div style="position:relative;display:flex;align-items:center;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:1rem;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" placeholder="Enter your password (min. 6 chars)"
+            [value]="password()"
+            (input)="setPassword($any($event.target).value)"
+            [disabled]="isLoading()"
+            style="width:100%;padding:0.85rem 1rem 0.85rem 2.75rem;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;color:#ffffff;font-size:0.9rem;outline:none;" required />
+        </div>
+      </div>
+
+      <button type="submit"
+        [disabled]="isLoading()"
+        style="background:linear-gradient(135deg,#6366f1,#4f46e5);border:none;border-radius:12px;color:#ffffff;padding:0.9rem;cursor:pointer;font-size:0.92rem;display:flex;justify-content:center;align-items:center;gap:0.5rem;margin-top:0.5rem;box-shadow:0 8px 24px rgba(99,102,241,0.3);font-weight:600;">
+        @if (isLoading()) {
+          <span>Authenticating...</span>
+        } @else {
+          <span style="display:inline-flex;align-items:center;gap:0.5rem;">
+            {{ isLogin() ? 'Sign In to Dashboard' : 'Create Account' }}
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </span>
+        }
+      </button>
+    </form>
+
+    <button (click)="onBackToHome()"
+      style="width:100%;margin-top:0.85rem;background:none;border:none;color:#6b7280;font-size:0.85rem;font-weight:500;cursor:pointer;text-align:center;display:block;">
+      ← Back to Home
+    </button>
+
+    <!-- Features Footer -->
+    <div style="display:flex;justify-content:center;gap:1.5rem;margin-top:2rem;border-top:1px solid rgba(255,255,255,0.04);padding-top:1.25rem;">
+      <div style="display:flex;align-items:center;gap:0.35rem;font-size:0.74rem;color:#6b7280;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+        <span>Encrypted Ledger</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.35rem;font-size:0.74rem;color:#6b7280;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></svg>
+        <span>Multi-Bank Support</span>
+      </div>
+    </div>
+  </div>
+</div>
