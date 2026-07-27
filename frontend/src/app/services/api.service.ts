@@ -35,7 +35,7 @@ export interface SyncRequest {
   accounts: AccountDto[];
 }
 
-const API_BASE = 'http://localhost:8082/api';
+const API_BASE = window.location.hostname === 'localhost' ? 'http://localhost:8082/api' : '/api';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
