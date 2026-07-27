@@ -1,9 +1,41 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Transaction, TransactionFilters } from '../models/transaction.model';
+import { Transaction, TransactionFilters, SyncSummaryResponse } from '../models/transaction.model';
 
-const API_BASE = 'http://localhost:8080/api';
+export interface InstitutionDto {
+  institutionId: string;
+  name: string;
+}
+
+export interface ItemDto {
+  itemId: string;
+}
+
+export interface AccountDto {
+  accountId: string;
+  name: string;
+  officialName?: string;
+  mask?: string;
+  type: string;
+  subtype: string;
+  currency: string;
+  currentBalance: number;
+}
+
+export interface LinkBankResponse {
+  institution: InstitutionDto;
+  item: ItemDto;
+  accounts: AccountDto[];
+}
+
+export interface SyncRequest {
+  institution: InstitutionDto;
+  item: ItemDto;
+  accounts: AccountDto[];
+}
+
+const API_BASE = 'http://localhost:8082/api';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
@@ -61,11 +93,19 @@ export class ApiService {
     });
   }
 
-  ingestMockFeed(bankName: string): Observable<Transaction[]> {
-    return this.http.post<Transaction[]>(
-      `${API_BASE}/transactions/ingest/mock?bankName=${encodeURIComponent(bankName)}`,
+  linkBankMock(bankName: string): Observable<LinkBankResponse> {
+    return this.http.post<LinkBankResponse>(
+      `${API_BASE}/plaid/link?bankName=${encodeURIComponent(bankName)}`,
       null,
       { headers: this.authHeaders }
+    );
+  }
+
+  syncTransactions(syncRequest: SyncRequest): Observable<SyncSummaryResponse> {
+    return this.http.post<SyncSummaryResponse>(
+      `${API_BASE}/transactions/sync`,
+      syncRequest,
+      { headers: this.authHeaders.set('Content-Type', 'application/json') }
     );
   }
 

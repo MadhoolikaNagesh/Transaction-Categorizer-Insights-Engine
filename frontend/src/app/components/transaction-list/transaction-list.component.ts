@@ -85,11 +85,9 @@ export class TransactionListComponent implements OnChanges {
         date: this.newDate(),
         description: this.newDesc(),
         category: this.newCategory(),
-        bankName,
-        accountName: 'Wallet',
         anomalyStatus: 'NONE',
         type: this.newType()
-      }));
+      } as any));
       this.newDesc.set('');
       this.newAmount.set('');
       this.newCategory.set('Uncategorized');

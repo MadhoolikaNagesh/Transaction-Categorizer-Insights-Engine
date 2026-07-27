@@ -110,18 +110,11 @@ export class AppComponent implements OnInit {
     this.loadTransactions();
   }
 
-  async handlePlaidSuccess(bankName: string): Promise<void> {
-    try {
-      this.syncMessage.set(`Syncing transactions with ${bankName}...`);
-      await lastValueFrom(this.api.ingestMockFeed(bankName));
-      this.syncMessage.set('Sync completed! AI has auto-categorized your bank feed.');
-      setTimeout(() => this.syncMessage.set(null), 4000);
-      this.loadTransactions();
-      this.loadLinkedBanks();
-    } catch (err) {
-      alert('Error during bank sync: ' + err);
-      this.syncMessage.set(null);
-    }
+  handlePlaidSuccess(summary: any): void {
+    this.syncMessage.set(`Sync completed! Added: ${summary.added}, Updated: ${summary.modified}`);
+    setTimeout(() => this.syncMessage.set(null), 4000);
+    this.loadTransactions();
+    this.loadLinkedBanks();
   }
 
   async handleUnlinkBank(bankName: string): Promise<void> {

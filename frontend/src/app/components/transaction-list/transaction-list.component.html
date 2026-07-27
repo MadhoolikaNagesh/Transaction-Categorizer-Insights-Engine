@@ -139,8 +139,8 @@
                 <span [class]="'category-badge ' + t.category.toLowerCase()">{{ t.category }}</span>
               </td>
               <td style="font-size:0.8rem;color:var(--text-secondary);">
-                <div>{{ t.bankName || 'Wallet' }}</div>
-                <div style="font-size:0.7rem;color:var(--text-muted);">{{ t.accountName || 'Cash' }}</div>
+                <div>{{ t.account?.bankConnection?.institutionName || 'Wallet' }}</div>
+                <div style="font-size:0.7rem;color:var(--text-muted);">{{ t.account?.officialName || t.account?.name || 'Cash' }}</div>
               </td>
               <td [style.color]="isCredit(t) ? 'var(--color-success)' : '#fff'" style="font-weight:700;">
                 {{ isCredit(t) ? '+' : '-' }} ₹{{ t.amount.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}

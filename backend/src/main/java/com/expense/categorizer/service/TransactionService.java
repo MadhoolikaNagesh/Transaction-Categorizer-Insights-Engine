@@ -1,6 +1,8 @@
 package com.expense.categorizer.service;
 
+import com.expense.categorizer.model.BankConnection;
 import com.expense.categorizer.model.Transaction;
+import com.expense.categorizer.repository.BankConnectionRepository;
 import com.expense.categorizer.repository.TransactionRepository;
 import com.expense.categorizer.repository.TransactionSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,9 @@ public class TransactionService {
 
     @Autowired
     private TransactionRepository repository;
+    
+    @Autowired
+    private BankConnectionRepository bankConnectionRepository;
 
     public List<Transaction> getTransactions(
             Long userId,
@@ -37,30 +42,23 @@ public class TransactionService {
     }
 
     public List<Transaction> getAllTransactions(Long userId) {
-        return repository.findAll().stream()
-                .filter(t -> userId != null && userId.equals(t.getUserId()))
-                .collect(Collectors.toList());
+        Specification<Transaction> spec = TransactionSpecification.getFilterSpecification(userId, null, null, null, null, null, null, null, null);
+        return repository.findAll(spec);
     }
 
     public Transaction saveTransaction(Transaction transaction) {
-        // Rule-based Auto Categorization if not provided
         if (transaction.getCategory() == null || transaction.getCategory().trim().isEmpty() || transaction.getCategory().equalsIgnoreCase("Uncategorized")) {
             transaction.setCategory(inferCategory(transaction.getDescription()));
         }
-        
         if (transaction.getCurrency() == null) {
             transaction.setCurrency("INR");
         }
-        
         if (transaction.getAnomalyStatus() == null) {
             transaction.setAnomalyStatus("NONE");
         }
 
         Transaction saved = repository.save(transaction);
-        
-        // Run anomaly detection for this transaction
         runAnomalyDetection(saved);
-        
         return repository.save(saved);
     }
 
@@ -78,23 +76,32 @@ public class TransactionService {
         }
         
         List<Transaction> savedList = repository.saveAll(transactions);
-        
-        // Run batch anomaly detection
         runBatchAnomalyDetection(savedList);
-        
         return repository.saveAll(savedList);
     }
 
     public void clearAllTransactions(Long userId) {
-        repository.deleteByUserId(userId);
+        repository.softDeleteAllByUserId(userId);
     }
 
     public void unlinkBank(Long userId, String bankName) {
-        repository.deleteByUserIdAndBankName(userId, bankName);
+        List<BankConnection> connections = bankConnectionRepository.findByUserId(userId).stream()
+                .filter(bc -> bankName.equals(bc.getInstitutionName()) && "ACTIVE".equals(bc.getStatus()))
+                .collect(Collectors.toList());
+
+        for (BankConnection bc : connections) {
+            bc.setStatus("UNLINKED");
+            bankConnectionRepository.save(bc);
+            repository.softDeleteByUserIdAndInstitutionId(userId, bc.getInstitutionId());
+        }
     }
 
     public List<String> getLinkedBanks(Long userId) {
-        return repository.findDistinctBankNamesByUserId(userId);
+        return bankConnectionRepository.findByUserId(userId).stream()
+                .filter(bc -> "ACTIVE".equals(bc.getStatus()))
+                .map(BankConnection::getInstitutionName)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     public Optional<Transaction> getTransactionById(Long id) {
@@ -103,11 +110,8 @@ public class TransactionService {
 
     public void runBatchAnomalyDetection(List<Transaction> transactions) {
         if (transactions.isEmpty()) return;
-        Long userId = transactions.get(0).getUserId();
-        // Detect duplicates only within this user's data
-        List<Transaction> userTransactions = repository.findAll().stream()
-                .filter(t -> userId != null && userId.equals(t.getUserId()))
-                .collect(Collectors.toList());
+        Long userId = transactions.get(0).getAccount().getBankConnection().getUserId();
+        List<Transaction> userTransactions = getAllTransactions(userId);
         for (Transaction t1 : transactions) {
             detectDuplicate(t1, userTransactions);
             detectSpike(t1, userTransactions);
@@ -116,17 +120,20 @@ public class TransactionService {
     }
 
     private void runAnomalyDetection(Transaction transaction) {
-        Long userId = transaction.getUserId();
-        List<Transaction> userTransactions = repository.findAll().stream()
-                .filter(t -> userId != null && userId.equals(t.getUserId()))
-                .collect(Collectors.toList());
+        if (transaction.getAccount() == null) return;
+        Long userId = transaction.getAccount().getBankConnection().getUserId();
+        List<Transaction> userTransactions = getAllTransactions(userId);
         detectDuplicate(transaction, userTransactions);
         detectSpike(transaction, userTransactions);
         detectHighValue(transaction);
     }
 
+    public void detectAnomalies(Transaction mockTx) {
+        runAnomalyDetection(mockTx);
+    }
+
     private void detectDuplicate(Transaction target, List<Transaction> searchPool) {
-        if (target.getAmount() == null || target.getDate() == null) return;
+        if (target.getAmount() == null || target.getDate() == null || target.getDescription() == null) return;
         if ("CREDIT".equals(target.getType())) return;
         
         for (Transaction other : searchPool) {
@@ -137,17 +144,15 @@ public class TransactionService {
                 continue;
             }
             
-            // Criteria: same amount, same merchant/description, date within 1 day
             boolean sameAmount = Math.abs(other.getAmount() - target.getAmount()) < 0.01;
             boolean sameMerchant = other.getDescription().equalsIgnoreCase(target.getDescription()) 
-                    || (other.getMerchant() != null && target.getMerchant() != null && other.getMerchant().equalsIgnoreCase(target.getMerchant()));
+                    || (other.getMerchantName() != null && target.getMerchantName() != null && other.getMerchantName().equalsIgnoreCase(target.getMerchantName()));
             boolean closeDate = Math.abs(other.getDate().toEpochDay() - target.getDate().toEpochDay()) <= 1;
 
             if (sameAmount && sameMerchant && closeDate) {
                 target.setAnomalyStatus("DUPLICATE_SUSPECT");
                 target.setAnomalyDescription("Possible duplicate charge. Similar transaction found on " + other.getDate() + " with amount ₹" + other.getAmount());
                 
-                // Flag the other transaction too if it wasn't flagged
                 if ("NONE".equals(other.getAnomalyStatus())) {
                     other.setAnomalyStatus("DUPLICATE_SUSPECT");
                     other.setAnomalyDescription("Possible duplicate charge. Similar transaction found on " + target.getDate() + " with amount ₹" + target.getAmount());
@@ -161,9 +166,8 @@ public class TransactionService {
     private void detectSpike(Transaction target, List<Transaction> searchPool) {
         if (target.getCategory() == null || target.getAmount() == null) return;
         if ("CREDIT".equals(target.getType())) return;
-        if ("DUPLICATE_SUSPECT".equals(target.getAnomalyStatus())) return; // duplicates take priority
+        if ("DUPLICATE_SUSPECT".equals(target.getAnomalyStatus())) return;
 
-        // Get average amount for this category (excluding credits)
         List<Transaction> categoryTransactions = searchPool.stream()
                 .filter(t -> !"CREDIT".equals(t.getType()))
                 .filter(t -> target.getCategory().equalsIgnoreCase(t.getCategory()))
@@ -176,7 +180,6 @@ public class TransactionService {
                     .average()
                     .orElse(0.0);
 
-            // If transaction is 3x or more than the average, alert
             if (target.getAmount() > (3 * avg) && target.getAmount() > 1000.0) {
                 target.setAnomalyStatus("HIGH_SPIKE");
                 target.setAnomalyDescription(String.format("Unusual spending spike! This expense is %.1fx higher than your average %s transaction (Avg: ₹%.2f).", 
@@ -190,7 +193,6 @@ public class TransactionService {
         if ("DUPLICATE_SUSPECT".equals(target.getAnomalyStatus()) || "HIGH_SPIKE".equals(target.getAnomalyStatus())) {
             return;
         }
-        // Mark absolute high expenses e.g., above 15000 as high value anomalies if not already flagged
         if (target.getAmount() != null && target.getAmount() >= 15000.0) {
             target.setAnomalyStatus("HIGH_VALUE");
             target.setAnomalyDescription("Large expense alert! Transaction is above ₹15,000 threshold.");
@@ -233,9 +235,7 @@ public class TransactionService {
     }
 
     public Map<String, Double> getCategoryStats(Long userId) {
-        List<Transaction> transactions = repository.findAll().stream()
-                .filter(t -> userId != null && userId.equals(t.getUserId()))
-                .collect(Collectors.toList());
+        List<Transaction> transactions = getAllTransactions(userId);
         return transactions.stream()
                 .filter(t -> t.getAmount() != null && t.getCategory() != null && !"Income".equalsIgnoreCase(t.getCategory()))
                 .collect(Collectors.groupingBy(
