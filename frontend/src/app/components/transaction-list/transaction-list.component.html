@@ -1,10 +1,10 @@
 <div class="card" style="display:flex;flex-direction:column;gap:1.25rem;">
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+  <div class="transaction-list-header">
     <div>
       <h2 style="font-size:1.25rem;font-weight:700;">Transaction History</h2>
       <p style="font-size:0.8rem;color:var(--text-secondary);">Showing {{ transactions.length }} transactions</p>
     </div>
-    <div style="display:flex;gap:0.5rem;">
+    <div class="transaction-list-actions">
       <button (click)="openPlaid.emit()" class="btn btn-primary">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
         Connect Bank Feed
