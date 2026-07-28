@@ -1,0 +1,182 @@
+<div style="position:relative;">
+  <!-- Avatar Button -->
+  <button id="account-menu-btn" (click)="toggleMenu()" class="btn btn-secondary"
+    [style.border]="isOpen() ? '1px solid rgba(99,102,241,0.6)' : '1px solid var(--border-color)'"
+    [style.background]="isOpen() ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.03)'"
+    style="display:flex;align-items:center;gap:0.4rem;padding:0.4rem 0.65rem;border-radius:50px;transition:all 0.2s ease;" title="Account">
+    <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#14b8a6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.8rem;font-weight:700;text-transform:uppercase;">
+      {{ getUserInitial() }}
+    </div>
+    <span style="font-size:0.78rem;font-weight:600;color:var(--text-primary);">{{ currentUser?.username }}</span>
+    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+      [style.transform]="isOpen() ? 'rotate(180deg)' : 'rotate(0deg)'" style="transition:transform 0.2s ease;"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+
+  <!-- Dropdown -->
+  @if (isOpen()) {
+    <div id="account-dropdown" style="position:absolute;top:calc(100% + 10px);right:0;width:280px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:14px;box-shadow:0 16px 48px rgba(0,0,0,0.5);overflow:hidden;z-index:1000;animation:dropdownFadeIn 0.18s ease;">
+
+      <!-- Header -->
+      <div style="padding:1rem 1.1rem 0.75rem;border-bottom:1px solid var(--border-color);background:linear-gradient(135deg,rgba(99,102,241,0.07),rgba(20,184,166,0.04));display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:0.65rem;">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#14b8a6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.9rem;font-weight:700;text-transform:uppercase;">
+            {{ getUserInitial() }}
+          </div>
+          <div>
+            <div style="font-size:0.85rem;font-weight:600;text-transform:capitalize;">{{ currentUser?.username }}</div>
+            <div style="font-size:0.7rem;color:var(--text-muted);">{{ linkedBankText() }}</div>
+          </div>
+        </div>
+        <button (click)="closeMenu()" class="btn btn-secondary btn-icon" style="padding:0.2rem;border-radius:50%;width:24px;height:24px;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+
+      <!-- Feedback Banner -->
+      @if (feedback()) {
+        <div [style.background]="feedback()!.type === 'success' ? 'rgba(20,184,166,0.12)' : 'rgba(239,68,68,0.12)'"
+          [style.color]="feedback()!.type === 'success' ? 'var(--color-success)' : '#ef4444'"
+          style="padding:0.55rem 1rem;border-bottom:1px solid var(--border-color);display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>
+          {{ feedback()!.message }}
+        </div>
+      }
+
+      <!-- MAIN VIEW -->
+      @if (view() === 'main') {
+        <div style="padding:0.5rem;">
+          <button id="account-link-btn" (click)="onLinkAccount()" class="account-menu-item">
+            <div class="account-menu-item-icon" style="background:rgba(99,102,241,0.12);color:#818cf8;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;">Link Account</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);">Connect a new bank via Plaid</div>
+            </div>
+          </button>
+
+          <button id="account-unlink-btn" (click)="setView('unlink')" class="account-menu-item" [disabled]="linkedBanks.length === 0" [style.opacity]="linkedBanks.length === 0 ? '0.45' : '1'">
+            <div class="account-menu-item-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18.84 12.25 1.72-1.71h-.02a5.004 5.004 0 0 0-.12-7.07 5.006 5.006 0 0 0-6.95 0l-1.72 1.71"/><path d="m5.17 11.75-1.71 1.71a5.004 5.004 0 0 0 .12 7.07 5.006 5.006 0 0 0 6.95 0l1.71-1.71"/><line x1="8" x2="8" y1="2" y2="5"/><line x1="2" x2="5" y1="8" y2="8"/><line x1="16" x2="16" y1="19" y2="22"/><line x1="19" x2="22" y1="16" y2="16"/></svg>
+            </div>
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;">Unlink Account</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);">{{ linkedBanks.length === 0 ? 'No banks linked' : 'Remove a linked bank' }}</div>
+            </div>
+          </button>
+
+          <div style="height:1px;background:var(--border-color);margin:0.4rem 0;"></div>
+
+          <button id="account-delete-btn" (click)="setView('delete-confirm')" class="account-menu-item account-menu-item-danger">
+            <div class="account-menu-item-icon" style="background:rgba(239,68,68,0.12);color:#ef4444;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+            </div>
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;">Delete Account Data</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);">Clear all transactions &amp; feeds</div>
+            </div>
+          </button>
+
+          <div style="height:1px;background:var(--border-color);margin:0.4rem 0;"></div>
+
+          <!-- Theme -->
+          <div style="padding:0.4rem 0.75rem;">
+            <div style="font-size:0.7rem;text-transform:uppercase;color:var(--text-muted);font-weight:700;margin-bottom:0.4rem;letter-spacing:0.05em;">Appearance</div>
+            <div style="display:flex;gap:0.4rem;">
+              <button (click)="onThemeChange('light')" class="account-menu-item"
+                [style.background]="theme === 'light' ? 'rgba(20,184,166,0.08)' : 'rgba(255,255,255,0.02)'"
+                [style.border]="theme === 'light' ? '1px solid var(--color-accent)' : '1px solid var(--border-color)'"
+                [style.color]="theme === 'light' ? 'var(--color-accent)' : 'var(--text-secondary)'"
+                style="flex:1;justify-content:center;padding:0.45rem;border-radius:8px;gap:0.4rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+                <span style="font-size:0.75rem;font-weight:600;">Light</span>
+              </button>
+              <button (click)="onThemeChange('dark')" class="account-menu-item"
+                [style.background]="theme === 'dark' ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.02)'"
+                [style.border]="theme === 'dark' ? '1px solid var(--color-primary)' : '1px solid var(--border-color)'"
+                [style.color]="theme === 'dark' ? 'var(--color-primary)' : 'var(--text-secondary)'"
+                style="flex:1;justify-content:center;padding:0.45rem;border-radius:8px;gap:0.4rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                <span style="font-size:0.75rem;font-weight:600;">Dark</span>
+              </button>
+            </div>
+          </div>
+
+          <div style="height:1px;background:var(--border-color);margin:0.4rem 0;"></div>
+
+          <button id="account-logout-btn" (click)="onLogout()" class="account-menu-item" style="color:#9ca3af;">
+            <div class="account-menu-item-icon" style="background:rgba(255,255,255,0.06);color:#9ca3af;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+            </div>
+            <div>
+              <div style="font-size:0.82rem;font-weight:600;">Log Out</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);">End your secure session</div>
+            </div>
+          </button>
+        </div>
+      }
+
+      <!-- UNLINK VIEW -->
+      @if (view() === 'unlink') {
+        <div style="padding:0.75rem 0.85rem;">
+          <button (click)="setView('main')" style="background:none;border:none;color:var(--text-muted);font-size:0.72rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;margin-bottom:0.75rem;padding:0;">← Back</button>
+          <div style="font-size:0.78rem;font-weight:700;color:var(--text-primary);margin-bottom:0.5rem;">Select bank to unlink</div>
+          @if (isLoadingBanks) {
+            <div style="display:flex;justify-content:center;padding:1rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            </div>
+          } @else if (linkedBanks.length === 0) {
+            <p style="font-size:0.75rem;color:var(--text-muted);text-align:center;padding:0.75rem 0;">No banks currently linked.</p>
+          } @else {
+            <div style="display:flex;flex-direction:column;gap:0.4rem;">
+              @for (bank of linkedBanks; track bank) {
+                <button [id]="'unlink-' + bank.toLowerCase().replace(' ', '-') + '-btn'"
+                  (click)="handleUnlink(bank)" [disabled]="unlinkingBank() === bank"
+                  style="display:flex;align-items:center;justify-content:space-between;padding:0.6rem 0.85rem;background:rgba(255,255,255,0.03);border:1px solid var(--border-color);border-radius:9px;cursor:pointer;color:var(--text-primary);"
+                  [style.opacity]="unlinkingBank() === bank ? '0.6' : '1'">
+                  <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <div [style.background-color]="getBankColor(bank)" style="width:10px;height:10px;border-radius:50%;flex-shrink:0;"></div>
+                    <span style="font-size:0.78rem;font-weight:600;">{{ bank }}</span>
+                  </div>
+                  @if (unlinkingBank() === bank) {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                  } @else {
+                    <span style="font-size:0.65rem;color:#ef4444;font-weight:600;">REMOVE</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- DELETE CONFIRM VIEW -->
+      @if (view() === 'delete-confirm') {
+        <div style="padding:1rem 1.1rem;">
+          <button (click)="setView('main')" style="background:none;border:none;color:var(--text-muted);font-size:0.72rem;cursor:pointer;display:flex;align-items:center;gap:0.3rem;margin-bottom:1rem;padding:0;">← Back</button>
+          <div style="text-align:center;padding:0.5rem 0 1rem;">
+            <div style="width:48px;height:48px;border-radius:50%;background:rgba(239,68,68,0.12);display:inline-flex;align-items:center;justify-content:center;margin-bottom:0.75rem;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div style="font-size:0.88rem;font-weight:700;color:var(--text-primary);margin-bottom:0.4rem;">Delete All Account Data?</div>
+            <p style="font-size:0.75rem;color:var(--text-muted);line-height:1.5;">This will permanently remove <strong>all transactions</strong> and linked bank feeds from the database. This action cannot be undone.</p>
+          </div>
+          <div style="display:flex;gap:0.5rem;">
+            <button (click)="setView('main')" class="btn btn-secondary" style="flex:1;font-size:0.78rem;">Cancel</button>
+            <button id="account-delete-confirm-btn" (click)="handleDeleteAccount()" [disabled]="isDeleting()" class="btn"
+              style="flex:1.5;font-size:0.78rem;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.35);color:#ef4444;display:flex;align-items:center;justify-content:center;gap:0.4rem;"
+              [style.opacity]="isDeleting() ? '0.6' : '1'" [style.cursor]="isDeleting() ? 'not-allowed' : 'pointer'">
+              @if (isDeleting()) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                Deleting...
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                Yes, Delete All
+              }
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

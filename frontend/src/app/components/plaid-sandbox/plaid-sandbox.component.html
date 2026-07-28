@@ -1,0 +1,129 @@
+@if (isOpen) {
+<div class="modal-overlay">
+  <div class="plaid-modal">
+    <!-- Header -->
+    <div class="plaid-header">
+      @if (step() > 1 && step() < 4) {
+        <button class="icon-btn back-btn" (click)="goBack()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+        </button>
+      }
+      <div class="plaid-logo">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+          <path d="M3 15h18v-2H3v2z"/>
+          <path d="M3 19h18v-2H3v2z"/>
+        </svg>
+        <span>Plaid</span>
+        <span class="sandbox-badge">Sandbox</span>
+      </div>
+      <button class="icon-btn close-btn" (click)="onClose()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Step 1: Select Bank -->
+    @if (step() === 1) {
+      <div class="plaid-body">
+        <h2>Select your institution</h2>
+        <p class="subtitle">Choose a bank to connect to ExpenseAI</p>
+        <div class="bank-grid">
+          @for (bank of banks; track bank.name) {
+            <button class="bank-card" (click)="handleSelectBank(bank.name)">
+              <div class="bank-icon" [style.backgroundColor]="bank.color">
+                {{ bank.name.charAt(0) }}
+              </div>
+              <span>{{ bank.name }}</span>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Step 2: Login -->
+    @if (step() === 2) {
+      <div class="plaid-body">
+        <h2>Enter your credentials</h2>
+        <p class="subtitle">Sign in to {{ selectedBank() }}</p>
+        <form class="plaid-form" (submit)="handleLoginSubmit($event)">
+          <div class="form-group">
+            <label>User ID</label>
+            <input type="text" [ngModel]="username()" (ngModelChange)="username.set($event)" name="username" placeholder="user_good" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" [ngModel]="password()" (ngModelChange)="password.set($event)" name="password" placeholder="pass_good" required>
+          </div>
+          <button type="submit" class="plaid-btn-primary" [disabled]="isLoading() || !username() || !password()">
+            {{ isLoading() ? 'Connecting...' : 'Submit' }}
+          </button>
+        </form>
+        <div class="plaid-footer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Secure connection encrypted by Plaid
+        </div>
+      </div>
+    }
+
+    <!-- Step 3: Select Accounts -->
+    @if (step() === 3 && linkResponse()) {
+      <div class="plaid-body">
+        <h2>Select accounts</h2>
+        <p class="subtitle">Choose the {{ selectedBank() }} accounts you want to link</p>
+        <div class="accounts-list" style="margin-bottom: 24px;">
+          @for (account of linkResponse()!.accounts; track account.accountId) {
+            <label class="account-item" style="display: flex; align-items: center; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 8px; cursor: pointer;">
+              <input type="checkbox" 
+                     [checked]="selectedAccountIds().has(account.accountId)"
+                     (change)="toggleAccount(account.accountId)"
+                     style="margin-right: 16px; width: 18px; height: 18px;">
+              <div style="flex: 1;">
+                <div style="font-weight: 500; color: var(--text-primary);">{{ account.officialName || account.name }}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">{{ account.type | titlecase }} • {{ account.subtype | titlecase }} •••••{{ account.mask }}</div>
+              </div>
+              <div style="font-weight: 600; color: var(--text-primary);">
+                ₹{{ account.currentBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}) }}
+              </div>
+            </label>
+          }
+        </div>
+        <button class="plaid-btn-primary" [disabled]="isLoading() || selectedAccountIds().size === 0" (click)="handleSync()">
+          {{ isLoading() ? 'Syncing...' : 'Link ' + selectedAccountIds().size + ' Account(s)' }}
+        </button>
+      </div>
+    }
+
+    <!-- Step 4: Success -->
+    @if (step() === 4 && syncResult()) {
+      <div class="plaid-body success-state">
+        <div class="success-icon" style="background: rgba(34,197,94,0.1); width: 64px; height: 64px; border-radius: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; color: #22c55e;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <path d="M22 4L12 14.01l-3-3"/>
+          </svg>
+        </div>
+        <h2>Success!</h2>
+        <p class="subtitle">Your accounts have been successfully linked.</p>
+        <div class="sync-stats" style="margin-top: 16px; padding: 16px; background: var(--bg-secondary); border-radius: 8px; text-align: left;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: var(--text-secondary)">New Transactions</span>
+            <span style="font-weight: 600; color: var(--text-primary);">{{ syncResult()!.added }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+            <span style="color: var(--text-secondary)">Updated</span>
+            <span style="font-weight: 600; color: var(--text-primary);">{{ syncResult()!.modified }}</span>
+          </div>
+        </div>
+        <p class="subtitle" style="margin-top: 24px; font-size: 0.85rem;">Redirecting to your select other accounts...</p>
+      </div>
+    }
+  </div>
+</div>
+}

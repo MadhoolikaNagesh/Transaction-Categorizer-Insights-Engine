@@ -1,9 +1,9 @@
 package com.expense.categorizer.repository;
 
 import com.expense.categorizer.model.Transaction;
+import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
-import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,16 +17,21 @@ public class TransactionSpecification {
             Double minAmount,
             Double maxAmount,
             String category,
-            String descriptionKeyword,
+            String search,
             Boolean anomalyOnly,
-            String bankName
+            String bankName // keep for backwards compatibility if needed, though we should probably use institutionId.
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (userId != null) {
-                predicates.add(cb.equal(root.get("userId"), userId));
-            }
+            // User ID mapping via Account -> BankConnection -> userId
+            predicates.add(cb.equal(root.get("account").get("bankConnection").get("userId"), userId));
+
+            // Only ACTIVE transactions
+            predicates.add(cb.or(
+                cb.equal(root.get("status"), "ACTIVE"),
+                cb.isNull(root.get("status")) // for legacy mocks if status is null
+            ));
 
             if (startDate != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("date"), startDate));
@@ -44,23 +49,27 @@ public class TransactionSpecification {
                 predicates.add(cb.lessThanOrEqualTo(root.get("amount"), maxAmount));
             }
 
-            if (category != null && !category.trim().isEmpty() && !category.equalsIgnoreCase("ALL")) {
+            if (category != null && !category.trim().isEmpty() && !"All".equalsIgnoreCase(category)) {
                 predicates.add(cb.equal(cb.lower(root.get("category")), category.trim().toLowerCase()));
             }
 
-            if (descriptionKeyword != null && !descriptionKeyword.trim().isEmpty()) {
-                predicates.add(cb.like(cb.lower(root.get("description")), "%" + descriptionKeyword.trim().toLowerCase() + "%"));
+            if (search != null && !search.trim().isEmpty()) {
+                String searchPattern = "%" + search.trim().toLowerCase() + "%";
+                Predicate descriptionPredicate = cb.like(cb.lower(root.get("description")), searchPattern);
+                Predicate merchantPredicate = cb.like(cb.lower(root.get("merchantName")), searchPattern);
+                Predicate categoryPredicate = cb.like(cb.lower(root.get("category")), searchPattern);
+                predicates.add(cb.or(descriptionPredicate, merchantPredicate, categoryPredicate));
             }
 
-            if (anomalyOnly != null && anomalyOnly) {
+            if (Boolean.TRUE.equals(anomalyOnly)) {
+                predicates.add(cb.isNotNull(root.get("anomalyStatus")));
                 predicates.add(cb.notEqual(root.get("anomalyStatus"), "NONE"));
             }
 
             if (bankName != null && !bankName.trim().isEmpty()) {
-                predicates.add(cb.equal(cb.lower(root.get("bankName")), bankName.trim().toLowerCase()));
+                // Map to institutionName
+                predicates.add(cb.equal(cb.lower(root.get("account").get("bankConnection").get("institutionName")), bankName.trim().toLowerCase()));
             }
-
-            query.orderBy(cb.desc(root.get("date")), cb.desc(root.get("id")));
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };

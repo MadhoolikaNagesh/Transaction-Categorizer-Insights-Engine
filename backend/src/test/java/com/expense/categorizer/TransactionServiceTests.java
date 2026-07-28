@@ -10,6 +10,11 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.expense.categorizer.model.Account;
+import com.expense.categorizer.model.BankConnection;
+import com.expense.categorizer.repository.AccountRepository;
+import com.expense.categorizer.repository.BankConnectionRepository;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
@@ -18,6 +23,12 @@ public class TransactionServiceTests {
 
     @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    private BankConnectionRepository bankConnectionRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     @Test
     public void testCategoryInference() {
@@ -33,24 +44,45 @@ public class TransactionServiceTests {
     public void testDuplicateAnomalyDetection() {
         transactionService.clearAllTransactions(1L);
 
+        BankConnection connection = BankConnection.builder()
+                .userId(1L)
+                .institutionId("ins_1")
+                .institutionName("Chase")
+                .plaidItemId("item_1")
+                .status("ACTIVE")
+                .build();
+        bankConnectionRepository.save(connection);
+
+        Account account = Account.builder()
+                .bankConnection(connection)
+                .externalAccountId("acc_1")
+                .name("Checking")
+                .type("depository")
+                .subtype("checking")
+                .status("ACTIVE")
+                .build();
+        accountRepository.save(account);
+
         LocalDate today = LocalDate.now();
 
         Transaction t1 = Transaction.builder()
+                .externalTransactionId("txn_1")
                 .amount(380.0)
                 .date(today)
                 .description("Starbucks MG Road")
                 .category("Dining")
-                .bankName("Chase")
-                .userId(1L)
+                .account(account)
+                .type("DEBIT")
                 .build();
 
         Transaction t2 = Transaction.builder()
+                .externalTransactionId("txn_2")
                 .amount(380.0)
                 .date(today)
                 .description("Starbucks MG Road")
                 .category("Dining")
-                .bankName("Chase")
-                .userId(1L)
+                .account(account)
+                .type("DEBIT")
                 .build();
 
         List<Transaction> saved = transactionService.saveTransactions(List.of(t1, t2));
