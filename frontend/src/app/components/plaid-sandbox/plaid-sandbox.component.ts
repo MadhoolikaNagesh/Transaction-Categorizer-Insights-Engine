@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService, LinkBankResponse, AccountDto } from '../../services/api.service';
@@ -8,11 +8,11 @@ import { lastValueFrom } from 'rxjs';
 interface Bank { name: string; color: string; }
 
 @Component({
-  selector: 'app-plaid-sandbox',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './plaid-sandbox.component.html',
-  styleUrls: ['./plaid-sandbox.component.css']
+    selector: 'app-plaid-sandbox',
+    imports: [CommonModule, FormsModule],
+    templateUrl: './plaid-sandbox.component.html',
+    changeDetection: ChangeDetectionStrategy.Eager,
+    styleUrls: ['./plaid-sandbox.component.css']
 })
 export class PlaidSandboxComponent {
   private api = inject(ApiService);

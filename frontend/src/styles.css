@@ -690,3 +690,109 @@ body {
 
   .chat-close-btn { display: flex; }
 }
+
+/* ==========================================================================
+   Desktop / Default Styles for Refactored Elements
+   ========================================================================== */
+.transaction-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.transaction-list-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* ==========================================================================
+   Mobile Responsiveness Improvements
+   ========================================================================== */
+
+/* Mobile & Small Screens (max-width: 600px) */
+@media (max-width: 600px) {
+  /* 1. App Container Padding Adjustment */
+  .app-container {
+    padding: 0.75rem;
+  }
+
+  /* 2. Responsive Header */
+  .app-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  /* Hide the long subtitle on mobile to save vertical space */
+  .brand-section span {
+    display: none;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+
+  /* 3. Metrics Cards (Change to 1-column stack) */
+  .stats-row {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem;
+  }
+  
+  .stat-card {
+    padding: 1rem;
+  }
+
+  /* 4. Card Spacing */
+  .card {
+    padding: 1rem !important;
+  }
+
+  /* 5. Transaction List Header & Action Buttons */
+  .transaction-list-header {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: 0.75rem !important;
+  }
+
+  .transaction-list-actions {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .transaction-list-actions button {
+    flex: 1; /* Stretch buttons to distribute width evenly */
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* 6. Filter Controls Stacking */
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .filter-bar > div, 
+  .filter-bar > select {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+  }
+  
+  .filter-bar select {
+    height: 38px;
+  }
+
+  /* 7. Table Spacing */
+  .transaction-table th, 
+  .transaction-table td {
+    padding: 0.75rem 0.5rem !important;
+    font-size: 0.85rem;
+  }
+}
+

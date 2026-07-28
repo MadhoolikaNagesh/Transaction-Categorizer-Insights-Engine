@@ -1,5 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal, HostListener, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnInit, signal, HostListener, ElementRef, ChangeDetectionStrategy } from '@angular/core';
+
 
 type MenuView = 'main' | 'unlink' | 'delete-confirm';
 type FeedbackType = 'success' | 'error';
@@ -7,10 +7,10 @@ type FeedbackType = 'success' | 'error';
 interface Feedback { type: FeedbackType; message: string; }
 
 @Component({
-  selector: 'app-account-menu',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './account-menu.component.html'
+    selector: 'app-account-menu',
+    imports: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './account-menu.component.html'
 })
 export class AccountMenuComponent {
   @Input() linkedBanks: string[] = [];

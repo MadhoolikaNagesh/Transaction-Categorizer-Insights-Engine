@@ -1,5 +1,5 @@
-import { Component, Output, EventEmitter, OnInit, signal, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Output, EventEmitter, OnInit, signal, ViewChild, ElementRef, AfterViewChecked, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { lastValueFrom } from 'rxjs';
@@ -12,10 +12,10 @@ interface ChatMessage {
 }
 
 @Component({
-  selector: 'app-chat-assistant',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './chat-assistant.component.html'
+    selector: 'app-chat-assistant',
+    imports: [FormsModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './chat-assistant.component.html'
 })
 export class ChatAssistantComponent implements OnInit, AfterViewChecked {
   @Output() closeChat = new EventEmitter<void>();

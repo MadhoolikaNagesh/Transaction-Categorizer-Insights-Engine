@@ -1,5 +1,5 @@
-import { Component, OnInit, signal, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, signal, effect, ChangeDetectionStrategy } from '@angular/core';
+
 import { ApiService } from './services/api.service';
 import { Transaction, TransactionFilters } from './models/transaction.model';
 import { LandingPageComponent } from './components/landing-page/landing-page.component';
@@ -12,10 +12,8 @@ import { AccountMenuComponent } from './components/account-menu/account-menu.com
 import { lastValueFrom } from 'rxjs';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    CommonModule,
+    selector: 'app-root',
+    imports: [
     LandingPageComponent,
     AuthPageComponent,
     DashboardComponent,
@@ -23,8 +21,9 @@ import { lastValueFrom } from 'rxjs';
     ChatAssistantComponent,
     PlaidSandboxComponent,
     AccountMenuComponent
-  ],
-  templateUrl: './app.component.html'
+],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './app.component.html'
 })
 export class AppComponent implements OnInit {
   currentUser = signal<{ id: number; username: string } | null>(null);

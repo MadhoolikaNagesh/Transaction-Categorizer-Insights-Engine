@@ -1,15 +1,15 @@
-import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, signal, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Transaction, TransactionFilters } from '../../models/transaction.model';
 import { lastValueFrom } from 'rxjs';
 
 @Component({
-  selector: 'app-transaction-list',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './transaction-list.component.html'
+    selector: 'app-transaction-list',
+    imports: [FormsModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './transaction-list.component.html'
 })
 export class TransactionListComponent implements OnChanges {
   @Input() transactions: Transaction[] = [];

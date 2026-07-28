@@ -1,5 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
+
 import { Transaction } from '../../models/transaction.model';
 
 interface SpendingCategory {
@@ -17,10 +17,10 @@ interface Spike {
 }
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './dashboard.component.html'
+    selector: 'app-dashboard',
+    imports: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './dashboard.component.html'
 })
 export class DashboardComponent implements OnChanges {
   @Input() transactions: Transaction[] = [];

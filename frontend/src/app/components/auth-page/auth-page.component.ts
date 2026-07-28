@@ -1,14 +1,14 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, Output, EventEmitter, signal, ChangeDetectionStrategy } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { lastValueFrom } from 'rxjs';
 
 @Component({
-  selector: 'app-auth-page',
-  standalone: true,
-  imports: [CommonModule, FormsModule],
-  templateUrl: './auth-page.component.html'
+    selector: 'app-auth-page',
+    imports: [FormsModule],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './auth-page.component.html'
 })
 export class AuthPageComponent {
   @Output() authSuccess = new EventEmitter<{ id: number; username: string }>();

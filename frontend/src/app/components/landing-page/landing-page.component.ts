@@ -1,11 +1,11 @@
-import { Component, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+
 
 @Component({
-  selector: 'app-landing-page',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './landing-page.component.html'
+    selector: 'app-landing-page',
+    imports: [],
+    changeDetection: ChangeDetectionStrategy.Eager,
+    templateUrl: './landing-page.component.html'
 })
 export class LandingPageComponent {
   @Output() getStarted = new EventEmitter<void>();
