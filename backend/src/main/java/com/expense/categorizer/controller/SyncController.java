@@ -4,14 +4,20 @@ import com.expense.categorizer.dto.LinkBankResponse;
 import com.expense.categorizer.dto.SyncRequest;
 import com.expense.categorizer.dto.SyncSummaryResponse;
 import com.expense.categorizer.dto.TransactionDto;
+import com.expense.categorizer.model.Account;
+import com.expense.categorizer.model.BankConnection;
 import com.expense.categorizer.model.Transaction;
+import com.expense.categorizer.repository.AccountRepository;
+import com.expense.categorizer.repository.BankConnectionRepository;
 import com.expense.categorizer.service.PlaidService;
 import com.expense.categorizer.service.TransactionService;
 import com.expense.categorizer.service.TransactionSyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,6 +43,12 @@ public class SyncController {
 
     @Autowired
     private PlaidService plaidService;
+
+    @Autowired
+    private BankConnectionRepository bankConnectionRepository;
+
+    @Autowired
+    private AccountRepository accountRepository;
 
     @GetMapping("/transactions")
     public ResponseEntity<List<TransactionDto>> getTransactions(
@@ -59,11 +72,54 @@ public class SyncController {
     @PostMapping("/transactions")
     public ResponseEntity<TransactionDto> createTransaction(
             @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(required = false) String bankName,
             @RequestBody Transaction transaction
     ) {
-        // For manual transaction creation - skipping account assignment for now
-        // Need a default account or a selected account ID.
-        // Left as is for legacy/testing
+        if (transaction.getAccount() == null) {
+            List<BankConnection> connections = bankConnectionRepository.findByUserId(userId).stream()
+                    .filter(bc -> "ACTIVE".equals(bc.getStatus()))
+                    .collect(Collectors.toList());
+
+            BankConnection connection = null;
+            if (bankName != null && !bankName.trim().isEmpty()) {
+                connection = connections.stream()
+                        .filter(bc -> bankName.equalsIgnoreCase(bc.getInstitutionName()))
+                        .findFirst()
+                        .orElse(null);
+            }
+
+            if (connection == null && !connections.isEmpty()) {
+                connection = connections.get(0);
+            }
+
+            if (connection == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No active bank connections found. Please link a bank feed first.");
+            }
+
+            List<Account> accounts = accountRepository.findByBankConnectionId(connection.getId());
+            if (accounts.isEmpty()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No accounts found for bank connection: " + connection.getInstitutionName());
+            }
+
+            // Try to assign the first depository/checking account, else default to the first available account
+            Account selectedAccount = accounts.get(0);
+            for (Account acc : accounts) {
+                if ("depository".equalsIgnoreCase(acc.getType())) {
+                    selectedAccount = acc;
+                    break;
+                }
+            }
+            transaction.setAccount(selectedAccount);
+        }
+
+        if (transaction.getExternalTransactionId() == null) {
+            transaction.setExternalTransactionId("manual_" + UUID.randomUUID().toString());
+        }
+
+        if (transaction.getStatus() == null) {
+            transaction.setStatus("ACTIVE");
+        }
+
         Transaction saved = transactionService.saveTransaction(transaction);
         return ResponseEntity.ok(mapToDto(saved));
     }

@@ -87,8 +87,12 @@ export class ApiService {
     });
   }
 
-  addTransaction(transaction: Transaction): Observable<Transaction> {
-    return this.http.post<Transaction>(`${API_BASE}/transactions`, transaction, {
+  addTransaction(transaction: Transaction, bankName?: string): Observable<Transaction> {
+    let url = `${API_BASE}/transactions`;
+    if (bankName) {
+      url += `?bankName=${encodeURIComponent(bankName)}`;
+    }
+    return this.http.post<Transaction>(url, transaction, {
       headers: this.authHeaders.set('Content-Type', 'application/json')
     });
   }

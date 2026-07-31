@@ -87,7 +87,7 @@ export class TransactionListComponent implements OnChanges {
         category: this.newCategory(),
         anomalyStatus: 'NONE',
         type: this.newType()
-      } as any));
+      } as any, bankName));
       this.newDesc.set('');
       this.newAmount.set('');
       this.newCategory.set('Uncategorized');
@@ -95,7 +95,13 @@ export class TransactionListComponent implements OnChanges {
       this.showAddForm.set(false);
       this.refresh.emit();
     } catch (err) {
-      alert('Error creating transaction: ' + err);
+      let errorMessage = 'An unexpected error occurred.';
+      if (err && typeof err === 'object') {
+        errorMessage = (err as any).error?.message || (err as any).message || JSON.stringify(err);
+      } else if (err) {
+        errorMessage = String(err);
+      }
+      alert('Error creating transaction: ' + errorMessage);
     } finally {
       this.isSubmitting.set(false);
     }
